@@ -22,6 +22,7 @@ module.exports = {
     "import/resolver": {
       "alias": {
         "map": [
+          ["@api", "./src/api"],
           ["@thirdparty", "./src/thirdparty"],
           ["@src", "./src"],
           ["@tests", "./tests"],

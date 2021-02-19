@@ -16,6 +16,7 @@
     "sourceRoot": "/",
     "baseUrl": "./",
     "paths": {
+      "@api/*": ["src/api/*"],
       "@thirdparty/*": ["src/thirdparty/*"],
       "@src/*": ["src/*"],
       "@tests/*": ["tests/*"]
