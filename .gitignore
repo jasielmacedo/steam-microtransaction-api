@@ -1,0 +1,23 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript v1 declaration files
+typings/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+
+# Local History VSCode file
+.history/
+
+# Misc
+.DS_Store
+.env.*
+.vscode
+.idea
+dist

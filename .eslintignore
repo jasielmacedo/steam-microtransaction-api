@@ -1,0 +1,5 @@
+.serverless
+node_modules
+.eslintrc.js
+.build
+/src/generated
