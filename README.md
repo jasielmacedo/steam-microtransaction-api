@@ -1,6 +1,8 @@
 # Steam Microtransaction API
 
-An intermediate api to handle steam microtransactions using steam web services
+An intermediate api to handle steam microtransactions using steam web services.
+
+You can use and consume this API with Unity, Unreal, Godot or any engine you want to develop a steam game.
 
 ## What is this?
 
