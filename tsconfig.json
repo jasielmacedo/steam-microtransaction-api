@@ -10,7 +10,7 @@
     "noUnusedParameters": true,
     "sourceMap": true,
     "target": "es2017",
-    "outDir": "lib",
+    "outDir": "dist",
     "inlineSources": true,
     "esModuleInterop": true,
     "sourceRoot": "/",

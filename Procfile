@@ -1,1 +1,1 @@
-web: node dist/src/entrypoint.js
+web: npm start

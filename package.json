@@ -1,15 +1,17 @@
 {
   "name": "steam-microtransaction-api",
   "version": "1.0.0",
-  "description": "An intermediate api to handle steam microtransactions using steam web services. ",
+  "description": "An intermediate api to handle steam microtransactions using steam web services.",
   "main": "./src/entrypoint.ts",
   "directories": {
     "test": "tests"
   },
   "scripts": {
+    "build": "tsc",
+    "build:doc": "apidoc -i src/ -o documentation/",
     "dev": "nodemon --watch \"src/\"  --exec \"ts-node -r tsconfig-paths/register ./src/entrypoint.ts\" -e ts",
-    "start": "DEBUG=server,app ts-node -r tsconfig-paths/register ./src/entrypoint.ts",
-    "test": "jest --ci --verbose",
+    "start": "ts-node -r tsconfig-paths/register ./src/entrypoint.ts",
+    "test": "NODE_ENV=test jest --ci --verbose --silent=false --detectOpenHandles --forceExit",
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "eslint . --ext .js,.ts --fix"
   },
@@ -35,8 +37,10 @@
     "@types/helmet": "^4.0.0",
     "@types/jest": "^26.0.20",
     "@types/node": "^14.14.30",
+    "@types/supertest": "^2.0.10",
     "@typescript-eslint/eslint-plugin": "^4.15.1",
     "@typescript-eslint/parser": "^4.15.1",
+    "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "debug": "^4.3.1",
@@ -51,13 +55,17 @@
     "helmet": "^4.4.1",
     "husky": "^5.0.9",
     "jest": "^26.6.3",
+    "morgan": "^1.10.0",
     "prettier": "^2.2.1",
+    "query-string": "^6.14.0",
+    "supertest": "^6.1.3",
     "ts-jest": "^26.5.1",
     "ts-node": "^9.1.1",
     "tsconfig-paths": "^3.9.0",
     "typescript": "^4.1.5"
   },
   "devDependencies": {
+    "apidoc": "^0.26.0",
     "nodemon": "^2.0.7"
   }
 }

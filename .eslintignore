@@ -1,5 +1,5 @@
-.serverless
+documentation
 node_modules
 .eslintrc.js
-.build
+dist
 /src/generated

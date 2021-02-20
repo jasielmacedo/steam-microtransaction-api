@@ -23,7 +23,7 @@ module.exports = {
       "alias": {
         "map": [
           ["@api", "./src/api"],
-          ["@thirdparty", "./src/thirdparty"],
+          ["@steam", "./src/steam"],
           ["@src", "./src"],
           ["@tests", "./tests"],
         ],
