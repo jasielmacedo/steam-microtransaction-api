@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using LitJson;
 
 namespace Jazz.http
 {
@@ -41,7 +40,7 @@ namespace Jazz.http
             HttpRequestContainer request = new HttpRequestContainer()
             {
                 apiEndPoint = apiEndPoint,
-                Payload = Encoding.UTF8.GetBytes(JsonMapper.ToJson(args)),
+                Payload = Encoding.UTF8.GetBytes(JsonUtility.ToJson(args)),
                 urlCall = _apiSettings.MakeApiUrl(apiEndPoint),
                 CallbackError = errorCallback,
                 CallbackSuccess = successCallback,
