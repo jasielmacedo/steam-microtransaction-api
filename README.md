@@ -26,7 +26,8 @@ This is a Typescript (Nodejs v12+) Based API and you can use services like herok
 
 ## Integrate with your game
 
-You can check the documentation on the ./documentation folder
+You can check the documentation of this API here
+[https://jasielmacedo.github.io/steam-microtransaction-api/](https://jasielmacedo.github.io/steam-microtransaction-api/)
 
 The flow is:
 
