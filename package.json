@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "build:doc": "apidoc -i src/ -o documentation/",
+    "build:doc": "apidoc -i src/ -o docs/",
     "dev": "nodemon --watch \"src/\"  --exec \"ts-node -r tsconfig-paths/register ./src/entrypoint.ts\" -e ts",
     "start": "ts-node -r tsconfig-paths/register ./src/entrypoint.ts",
     "test": "NODE_ENV=test jest --ci --verbose --silent=false --detectOpenHandles --forceExit",
