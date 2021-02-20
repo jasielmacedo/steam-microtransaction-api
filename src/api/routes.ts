@@ -59,6 +59,7 @@ export default (app: Express): void => {
 
      * @apiHeader {String} content-type application/json *required
      * 
+     * @apiParam  (json) {String} appId string,
      * @apiParam  (json) {String} orderId string,
      * @apiParam  (json) {String} currency number, 
      * @apiParam  (json) {String} itemId string,
@@ -69,6 +70,7 @@ export default (app: Express): void => {
      * 
      * @apiParamExample {json} Request-Example:
      * {
+     *      appId: '480',
      *      orderId: '1',
      *      currency: 199, 
      *      itemId: 'abc',

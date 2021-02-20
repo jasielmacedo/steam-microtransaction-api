@@ -10,6 +10,8 @@ If you want to implement micro-transactions in your game you need to create a we
 
 To save time and money, I decided to create one unique code to help game developers to implement microtransactions quickly.
 
+With this repository you can use Heroku to deploy your own api without problem. See [Heroku git deploy](https://devcenter.heroku.com/articles/git)
+
 ## How to start the API?
 
 This is a Typescript (Nodejs v12+) Based API and you can use services like heroku, digital ocean to publish this API.
@@ -20,7 +22,7 @@ This is a Typescript (Nodejs v12+) Based API and you can use services like herok
 - Replace ./src/constants.ts values according with your informations
 - Run ```npm install``` to install the dependencies
 - To test if your webkey is valid run ```npm run test```
-- And to start the aplication simply run ```npm start```
+- And to start the application simply run ```npm start```
 
 ## Integrate with your game
 
@@ -30,14 +32,31 @@ The flow is:
 
 - The user (player) clicks on the UI product
 - Your game call /InitPurchase endpoint to start the purchase.
-- The game will popup a confirmation dialog
-- The user buy the item
-- *The game receive a callback confirming the purchase
+- The game will popup a confirmation dialog (Inside the game)
+- The user buy the item (pay for it)
+- *The game receive a callback confirmation about the purchase
 - Your game call /FinalizePurchase endpoint
 - And That's it
 
 *If the user have parental control and the callback was not called, you can check the status calling the /CheckPurchaseStatus
 
+### Security check
+
 In-Game Purchases is not complicated but you need to be sure if the steam user is reliable.
 
 To avoid scammers, simply call the /GetReliableUserInfo endpoint if the return is true, you can start the microtransaction. 
+
+## Example with Unity (C#)
+
+You can check example folder to see an example using unity
+
+## About
+
+Ok, maybe you are thinking: "Have you tested this code properly?" Well I used a similar version of this code inside a game called Deliverace.
+It's not available on steam anymore, but this code works.
+
+If you have any question, suggestion or issues you can use the issues area.
+
+## Contribuition
+
+You can contribute, just opening a pull request. Together we can help a lot of developers to implement In-Game Purchases.

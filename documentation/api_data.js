@@ -1,337 +1,337 @@
-define({
-  api: [
-    {
-      type: 'post',
-      url: '/CheckPurchaseStatus',
-      title: 'Check Purchase Status',
-      name: 'CheckPurchaseStatus',
-      group: 'Microtransaction',
-      version: '1.0.0',
-      description: '<p>Retrieve the current status of the purchase</p>',
-      header: {
-        fields: {
-          Header: [
-            {
-              group: 'Header',
-              type: 'String',
-              optional: false,
-              field: 'content-type',
-              description: '<p>application/json *required</p>',
-            },
-          ],
-        },
-      },
-      parameter: {
-        fields: {
-          json: [
-            {
-              group: 'json',
-              type: 'String',
-              optional: false,
-              field: 'appId',
-              description: '<p>Steam App Id</p>',
-            },
-            {
-              group: 'json',
-              type: 'String',
-              optional: false,
-              field: 'orderId',
-              description: '<p>Order Id</p>',
-            },
-            {
-              group: 'json',
-              type: 'String',
-              optional: false,
-              field: 'transId',
-              description: '<p>Transaction Id</p>',
-            },
-          ],
-        },
-      },
-      success: {
-        fields: {
-          'Response: 200': [
-            {
-              group: 'Response: 200',
-              type: 'Boolean',
-              optional: false,
-              field: 'success',
-              description: '',
-            },
-            {
-              group: 'Response: 200',
-              type: 'Json',
-              optional: false,
-              field: 'fields',
-              description: '<p>Retrieve Transaction Data</p>',
-            },
-          ],
-        },
-        examples: [
+define({ "api": [
+  {
+    "type": "post",
+    "url": "/CheckPurchaseStatus",
+    "title": "Check Purchase Status",
+    "name": "CheckPurchaseStatus",
+    "group": "Microtransaction",
+    "version": "1.0.0",
+    "description": "<p>Retrieve the current status of the purchase</p>",
+    "header": {
+      "fields": {
+        "Header": [
           {
-            title: 'Success-Response:',
-            content:
-              'HTTP/1.1 200\n{\n    success : true,\n    orderid : string,\n    transid : string,\n    steamid : string,\n    status : string,\n    currency: string\n    time: string,\n    country: string,\n    usstate: string,\n    items: [{\n         itemid : string,\n         qty : number,\n         amount : string,\n         vat : string,\n         itemstatus : string,\n    }]\n}',
-            type: 'Object',
-          },
-        ],
-      },
-      filename: 'src/api/routes.ts',
-      groupTitle: 'Microtransaction',
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "content-type",
+            "description": "<p>application/json *required</p>"
+          }
+        ]
+      }
     },
-    {
-      type: 'post',
-      url: '/FinalizePurchase',
-      title: 'Finalize Purchase',
-      name: 'FinalizePurchase',
-      group: 'Microtransaction',
-      version: '1.0.0',
-      description:
-        '<p>Finalize the transaction. See https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#FinalizeTxn</p>',
-      header: {
-        fields: {
-          Header: [
-            {
-              group: 'Header',
-              type: 'String',
-              optional: false,
-              field: 'content-type',
-              description: '<p>application/json *required</p>',
-            },
-          ],
-        },
-      },
-      parameter: {
-        fields: {
-          json: [
-            {
-              group: 'json',
-              type: 'String',
-              optional: false,
-              field: 'appId',
-              description: '<p>Steam App Id</p>',
-            },
-            {
-              group: 'json',
-              type: 'String',
-              optional: false,
-              field: 'orderId',
-              description: '<p>Order Id saved</p>',
-            },
-          ],
-        },
-      },
-      success: {
-        fields: {
-          'Response: 200': [
-            {
-              group: 'Response: 200',
-              type: 'Boolean',
-              optional: false,
-              field: 'success',
-              description: '<p>Return true if the transaction was finished successfully</p>',
-            },
-          ],
-        },
-        examples: [
+    "parameter": {
+      "fields": {
+        "json": [
           {
-            title: 'Success-Response:',
-            content: 'HTTP/1.1 200\n{\n    success : true,\n}',
-            type: 'Object',
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "appId",
+            "description": "<p>Steam App Id</p>"
           },
-        ],
-      },
-      filename: 'src/api/routes.ts',
-      groupTitle: 'Microtransaction',
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "orderId",
+            "description": "<p>Order Id</p>"
+          },
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "transId",
+            "description": "<p>Transaction Id</p>"
+          }
+        ]
+      }
     },
-    {
-      type: 'post',
-      url: '/GetReliableUserInfo',
-      title: 'Get Reliable User Info',
-      name: 'GetReliableUserInfo',
-      group: 'Microtransaction',
-      version: '1.0.0',
-      description:
-        '<p>Check if the user is reliable to start purchase. Return true if user is reliable</p>',
-      header: {
-        fields: {
-          Header: [
-            {
-              group: 'Header',
-              type: 'String',
-              optional: false,
-              field: 'content-type',
-              description: '<p>application/json *required</p>',
-            },
-          ],
-        },
-      },
-      parameter: {
-        fields: {
-          json: [
-            {
-              group: 'json',
-              type: 'String',
-              optional: false,
-              field: 'steamId',
-              description: '<p>New password</p>',
-            },
-            {
-              group: 'json',
-              type: 'String',
-              optional: false,
-              field: 'appId',
-              description: '<p>Old Password</p>',
-            },
-          ],
-        },
-      },
-      success: {
-        fields: {
-          'Response: 200': [
-            {
-              group: 'Response: 200',
-              type: 'Boolean',
-              optional: false,
-              field: 'success',
-              description: '<p>Response Status</p>',
-            },
-          ],
-        },
-        examples: [
+    "success": {
+      "fields": {
+        "Response: 200": [
           {
-            title: 'Success-Response:',
-            content: 'HTTP/1.1 200\n{\n    success : true,\n}',
-            type: 'Object',
+            "group": "Response: 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": ""
           },
-        ],
+          {
+            "group": "Response: 200",
+            "type": "Json",
+            "optional": false,
+            "field": "fields",
+            "description": "<p>Retrieve Transaction Data</p>"
+          }
+        ]
       },
-      filename: 'src/api/routes.ts',
-      groupTitle: 'Microtransaction',
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success : true,\n    orderid : string,\n    transid : string,\n    steamid : string,\n    status : string,\n    currency: string\n    time: string,\n    country: string,\n    usstate: string,\n    items: [{\n         itemid : string,\n         qty : number,\n         amount : string,\n         vat : string,\n         itemstatus : string,\n    }]\n}",
+          "type": "Object"
+        }
+      ]
     },
-    {
-      type: 'post',
-      url: '/InitPurchase',
-      title: 'Init Purchase',
-      name: 'InitPurchase',
-      group: 'Microtransaction',
-      version: '1.0.0',
-      description:
-        '<p>Init the purchase process. After this call, the steam will popup an confirmation dialog in the game.</p>',
-      header: {
-        fields: {
-          Header: [
-            {
-              group: 'Header',
-              type: 'String',
-              optional: false,
-              field: 'content-type',
-              description: '<p>application/json *required</p>',
-            },
-          ],
-        },
-      },
-      parameter: {
-        fields: {
-          json: [
-            {
-              group: 'json',
-              type: 'String',
-              optional: false,
-              field: 'orderId',
-              description: '<p>string,</p>',
-            },
-            {
-              group: 'json',
-              type: 'String',
-              optional: false,
-              field: 'currency',
-              description: '<p>number,</p>',
-            },
-            {
-              group: 'json',
-              type: 'String',
-              optional: false,
-              field: 'itemId',
-              description: '<p>string,</p>',
-            },
-            {
-              group: 'json',
-              type: 'String',
-              optional: false,
-              field: 'itemDescription',
-              description: '<p>string,</p>',
-            },
-            {
-              group: 'json',
-              type: 'String',
-              optional: false,
-              field: 'category',
-              description: '<p>string,</p>',
-            },
-          ],
-        },
-        examples: [
+    "filename": "src/api/routes.ts",
+    "groupTitle": "Microtransaction"
+  },
+  {
+    "type": "post",
+    "url": "/FinalizePurchase",
+    "title": "Finalize Purchase",
+    "name": "FinalizePurchase",
+    "group": "Microtransaction",
+    "version": "1.0.0",
+    "description": "<p>Finalize the transaction. See https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#FinalizeTxn</p>",
+    "header": {
+      "fields": {
+        "Header": [
           {
-            title: 'Request-Example:',
-            content:
-              "{\n     orderId: '1',\n     currency: 199, \n     itemId: 'abc',\n     itemDescription: 'abcd',\n     category: 'gold',\n}",
-            type: 'json',
-          },
-        ],
-      },
-      success: {
-        fields: {
-          'Response: 200': [
-            {
-              group: 'Response: 200',
-              type: 'Boolean',
-              optional: false,
-              field: 'transid',
-              description: '<p>Transaction Id</p>',
-            },
-          ],
-        },
-        examples: [
-          {
-            title: 'Success-Response:',
-            content: 'HTTP/1.1 200\n{\n    transid : "asdfglorenid",\n}',
-            type: 'Object',
-          },
-        ],
-      },
-      filename: 'src/api/routes.ts',
-      groupTitle: 'Microtransaction',
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "content-type",
+            "description": "<p>application/json *required</p>"
+          }
+        ]
+      }
     },
-    {
-      type: 'get',
-      url: '/',
-      title: 'Initial route to check API Status',
-      name: 'Health',
-      group: 'Status',
-      version: '1.0.0',
-      success: {
-        fields: {
-          'Response: 200': [
-            {
-              group: 'Response: 200',
-              type: 'Boolean',
-              optional: false,
-              field: 'success',
-              description: '<p>returns true if everything is ok</p>',
-            },
-          ],
-        },
-        examples: [
+    "parameter": {
+      "fields": {
+        "json": [
           {
-            title: 'Success-Response:',
-            content: 'HTTP/1.1 200\n{\n    status : boolean\n}',
-            type: 'Object',
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "appId",
+            "description": "<p>Steam App Id</p>"
           },
-        ],
-      },
-      filename: 'src/api/routes.ts',
-      groupTitle: 'Status',
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "orderId",
+            "description": "<p>Order Id saved</p>"
+          }
+        ]
+      }
     },
-  ],
-});
+    "success": {
+      "fields": {
+        "Response: 200": [
+          {
+            "group": "Response: 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>Return true if the transaction was finished successfully</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success : true,\n}",
+          "type": "Object"
+        }
+      ]
+    },
+    "filename": "src/api/routes.ts",
+    "groupTitle": "Microtransaction"
+  },
+  {
+    "type": "post",
+    "url": "/GetReliableUserInfo",
+    "title": "Get Reliable User Info",
+    "name": "GetReliableUserInfo",
+    "group": "Microtransaction",
+    "version": "1.0.0",
+    "description": "<p>Check if the user is reliable to start purchase. Return true if user is reliable</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "content-type",
+            "description": "<p>application/json *required</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "json": [
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "steamId",
+            "description": "<p>New password</p>"
+          },
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "appId",
+            "description": "<p>Old Password</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Response: 200": [
+          {
+            "group": "Response: 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>Response Status</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success : true,\n}",
+          "type": "Object"
+        }
+      ]
+    },
+    "filename": "src/api/routes.ts",
+    "groupTitle": "Microtransaction"
+  },
+  {
+    "type": "post",
+    "url": "/InitPurchase",
+    "title": "Init Purchase",
+    "name": "InitPurchase",
+    "group": "Microtransaction",
+    "version": "1.0.0",
+    "description": "<p>Init the purchase process. After this call, the steam will popup an confirmation dialog in the game.</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "content-type",
+            "description": "<p>application/json *required</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "json": [
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "appId",
+            "description": "<p>string,</p>"
+          },
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "orderId",
+            "description": "<p>string,</p>"
+          },
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "currency",
+            "description": "<p>number,</p>"
+          },
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "itemId",
+            "description": "<p>string,</p>"
+          },
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "itemDescription",
+            "description": "<p>string,</p>"
+          },
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "category",
+            "description": "<p>string,</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n     appId: '480',\n     orderId: '1',\n     currency: 199, \n     itemId: 'abc',\n     itemDescription: 'abcd',\n     category: 'gold',\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Response: 200": [
+          {
+            "group": "Response: 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "transid",
+            "description": "<p>Transaction Id</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    transid : \"asdfglorenid\",\n}",
+          "type": "Object"
+        }
+      ]
+    },
+    "filename": "src/api/routes.ts",
+    "groupTitle": "Microtransaction"
+  },
+  {
+    "type": "get",
+    "url": "/",
+    "title": "Initial route to check API Status",
+    "name": "Health",
+    "group": "Status",
+    "version": "1.0.0",
+    "success": {
+      "fields": {
+        "Response: 200": [
+          {
+            "group": "Response: 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>returns true if everything is ok</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    status : boolean\n}",
+          "type": "Object"
+        }
+      ]
+    },
+    "filename": "src/api/routes.ts",
+    "groupTitle": "Status"
+  }
+] });

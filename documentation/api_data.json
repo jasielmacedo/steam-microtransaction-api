@@ -233,6 +233,13 @@
             "group": "json",
             "type": "String",
             "optional": false,
+            "field": "appId",
+            "description": "<p>string,</p>"
+          },
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
             "field": "orderId",
             "description": "<p>string,</p>"
           },
@@ -269,7 +276,7 @@
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n     orderId: '1',\n     currency: 199, \n     itemId: 'abc',\n     itemDescription: 'abcd',\n     category: 'gold',\n}",
+          "content": "{\n     appId: '480',\n     orderId: '1',\n     currency: 199, \n     itemId: 'abc',\n     itemDescription: 'abcd',\n     category: 'gold',\n}",
           "type": "json"
         }
       ]
