@@ -1,5 +1,5 @@
-import steamrequest from '@src/steam/steamrequest';
 import constants from '@src/constants';
+import steamrequest from '@src/steam/steamrequest';
 
 describe('Testing steam integration', () => {
   it('Check app ownership', async done => {

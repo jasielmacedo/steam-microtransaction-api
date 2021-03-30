@@ -1,14 +1,12 @@
+import { Express } from 'express';
+
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import Debug from 'debug';
-import { Express } from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import routes from './routes';
 
-const Log = Debug('server');
-
-export default (app: Express, host: string, port: number | string) => {
+export default (app: Express, host: string, port: number | string): Express => {
   const corsOptions = {
     origin: ['*'],
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'],
@@ -36,7 +34,8 @@ export default (app: Express, host: string, port: number | string) => {
 
   // start the app
   app.listen(port, () => {
-    Log(`Server ${host} started at port:${port}`);
+    // eslint-disable-next-line no-console
+    console.log(`Server ${host} started at port:${port}`);
   });
 
   return app;

@@ -1,5 +1,5 @@
-import supertest from 'supertest';
 import server from '@src/entrypoint';
+import supertest from 'supertest';
 
 const request = supertest(server);
 

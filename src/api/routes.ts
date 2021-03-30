@@ -154,6 +154,7 @@ export default (app: Express): void => {
 
   app.use('/', router);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   app.use((_err: any, _req: Request, res: Response, _next: NextFunction) => {
     res.status(500).json({
       error: 500,
