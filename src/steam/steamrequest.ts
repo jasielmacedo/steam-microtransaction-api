@@ -1,5 +1,6 @@
+import constants from '@src/constants';
 import queryString from 'query-string';
-import axios, { AxiosResponse } from 'axios';
+
 import {
   ISteamMicroGetUserInfo,
   ISteamMicroTx,
@@ -11,7 +12,7 @@ import {
   ISteamUserTicket,
   SteamOptions,
 } from './steaminterfaces';
-import constants from '@src/constants';
+import axios, { AxiosResponse } from 'axios';
 
 export default new (class SteamRequest {
   private options: SteamOptions;
