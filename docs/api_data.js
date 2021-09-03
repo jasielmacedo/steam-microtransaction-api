@@ -1,6 +1,70 @@
 define({ "api": [
   {
     "type": "post",
+    "url": "/CheckAppOwnership",
+    "title": "Check if the user really owns the AppId",
+    "name": "CheckAppOwnership",
+    "group": "Microtransaction",
+    "version": "1.0.0",
+    "description": "<p>Return success:true if the user owns the app. Useful to prevent purchase from non-owners</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "content-type",
+            "description": "<p>application/json *required</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "json": [
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "steamId",
+            "description": "<p>User Steam ID</p>"
+          },
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "appId",
+            "description": "<p>Steam App/Game ID</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Response: 200": [
+          {
+            "group": "Response: 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>Response Status</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success : true,\n}",
+          "type": "Object"
+        }
+      ]
+    },
+    "filename": "src/api/routes.ts",
+    "groupTitle": "Microtransaction"
+  },
+  {
+    "type": "post",
     "url": "/CheckPurchaseStatus",
     "title": "Check Purchase Status",
     "name": "CheckPurchaseStatus",
@@ -170,14 +234,14 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "steamId",
-            "description": "<p>New password</p>"
+            "description": "<p>User Steam ID</p>"
           },
           {
             "group": "json",
             "type": "String",
             "optional": false,
             "field": "appId",
-            "description": "<p>Old Password</p>"
+            "description": "<p>Steam App/Game ID</p>"
           }
         ]
       }
@@ -252,7 +316,7 @@ define({ "api": [
           },
           {
             "group": "json",
-            "type": "String",
+            "type": "Integer",
             "optional": false,
             "field": "itemId",
             "description": "<p>string,</p>"
@@ -270,13 +334,20 @@ define({ "api": [
             "optional": false,
             "field": "category",
             "description": "<p>string,</p>"
+          },
+          {
+            "group": "json",
+            "type": "String",
+            "optional": false,
+            "field": "steamId",
+            "description": "<p>User Steam ID</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n     appId: '480',\n     orderId: '1',\n     currency: 199, \n     itemId: 'abc',\n     itemDescription: 'abcd',\n     category: 'gold',\n}",
+          "content": "{\n     appId: '480',\n     orderId: '1',\n     currency: 199, \n     itemId: 11222,\n     itemDescription: 'abcd',\n     category: 'gold',\n     steamID: '765443152131231231',\n}",
           "type": "json"
         }
       ]
