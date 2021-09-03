@@ -36,8 +36,8 @@ export default (app: Express): void => {
 
      * @apiHeader {String} content-type application/json *required
      * 
-     * @apiParam  (json) {String} steamId New password
-     * @apiParam  (json) {String} appId Old Password
+     * @apiParam  (json) {String} steamId User Steam ID
+     * @apiParam  (json) {String} appId Steam App/Game ID
      * 
      * @apiSuccess (Response: 200) {Boolean} success Response Status
      * 
@@ -52,6 +52,30 @@ export default (app: Express): void => {
 
   /**
      * 
+     * @api {post} /CheckAppOwnership Check if the user really owns the AppId
+     * @apiName CheckAppOwnership
+     * @apiGroup Microtransaction
+     * @apiVersion  1.0.0
+     * @apiDescription Return success:true if the user owns the app. Useful to prevent purchase from non-owners
+
+     * @apiHeader {String} content-type application/json *required
+     * 
+     * @apiParam  (json) {String} steamId User Steam ID
+     * @apiParam  (json) {String} appId Steam App/Game ID
+     * 
+     * @apiSuccess (Response: 200) {Boolean} success Response Status
+     * 
+     * @apiSuccessExample {Object} Success-Response:
+     * HTTP/1.1 200
+     * {
+     *     success : true,
+     * }
+     * 
+     */
+  router.post('/CheckAppOwnership', steamController.checkAppOwnership);
+
+  /**
+     * 
      * @api {post} /InitPurchase Init Purchase
      * @apiName InitPurchase
      * @apiGroup Microtransaction
@@ -63,9 +87,10 @@ export default (app: Express): void => {
      * @apiParam  (json) {String} appId string,
      * @apiParam  (json) {String} orderId string,
      * @apiParam  (json) {String} currency number, 
-     * @apiParam  (json) {String} itemId string,
+     * @apiParam  (json) {Integer} itemId string,
      * @apiParam  (json) {String} itemDescription string,
      * @apiParam  (json) {String} category string,
+     * @apiParam  (json) {String} steamId User Steam ID
      * 
      * @apiSuccess (Response: 200) {Boolean} transid Transaction Id
      * 
@@ -74,9 +99,10 @@ export default (app: Express): void => {
      *      appId: '480',
      *      orderId: '1',
      *      currency: 199, 
-     *      itemId: 'abc',
+     *      itemId: 11222,
      *      itemDescription: 'abcd',
      *      category: 'gold',
+     *      steamID: '765443152131231231',
      * }
      * 
      * @apiSuccessExample {Object} Success-Response:

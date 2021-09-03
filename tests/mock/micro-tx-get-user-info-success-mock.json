@@ -1,0 +1,11 @@
+{
+  "response": {
+    "result": "OK",
+    "params": {
+      "state": "",
+      "country": "US",
+      "currency": "USD",
+      "status": "Trusted"
+    }
+  }
+}

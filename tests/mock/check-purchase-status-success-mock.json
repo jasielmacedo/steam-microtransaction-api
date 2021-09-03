@@ -1,0 +1,24 @@
+{
+  "response": {
+    "result": "OK",
+    "params": {
+      "orderid": "FAKE-ORDER-ID",
+      "transid": "FAKE-TRANSACTION-ID",
+      "steamid": "FAKE-STEAM-ID",
+      "status": "Init",
+      "currency": "USD",
+      "time": "2021-01-01T00:00:00",
+      "country": "BR",
+      "usstate": "",
+      "items": [
+        {
+          "itemid": 10001,
+          "qty": 1,
+          "amount": "199",
+          "vat": "0",
+          "itemstatus": "OK"
+        }
+      ]
+    }
+  }
+}

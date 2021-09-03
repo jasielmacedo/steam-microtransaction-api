@@ -1,34 +1,24 @@
 export default {
   /**
    *  Don't forget to generate your own steam webkey
-   *  Check https://steamcommunity.com/dev and https://steamcommunity.com/dev/registerkey for more info
+   *  To generate the proper key, you need to implement the WebAPIKey from
+   *  Steam Developer Page, User&Permissions -> Manage Group -> (Your App's name)
    */
-  webkey: 'YOUR-WEBKEY-STEAM-HERE',
-  /**
-   * Steam app ID
-   * Replace with your app id
-   */
-  appId: '480',
-  /**
-   * SteamID (User id)
-   * Replace this with some valid steam user id. Check if this id owns the appid above
-   * This field will be used during tests
-   * See https://steamid.io
-   */
-  steamId: 'A-VALID-STEAM-ID',
+  webkey: process.env.STEAM_WEBKEY,
   /**
    * Useful during transaction creation
    * Steam automatically converts from this currency to the user local currency.
    * But you can change as you please.
+   * See https://partner.steamgames.com/doc/store/pricing/currencies
    */
-  currency: 'USD',
+  currency: process.env.STEAM_CURRENCY || 'USD',
   /**
-   * Used
+   * Used to define the locale of the item
    */
-  locale: 'en',
+  locale: process.env.STEAM_ITEM_LOCALE || 'en',
   /**
    * Set true if you want to enable sandbox mode
    * Please check https://partner.steamgames.com/doc/webapi/ISteamMicroTxnSandbox for more info
    */
-  development: process.env.NODE_ENV == 'test' || false,
+  development: process.env.NODE_ENV == 'test' || process.env.NODE_ENV === 'development',
 };

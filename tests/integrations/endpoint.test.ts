@@ -3,7 +3,7 @@ import supertest from 'supertest';
 
 const request = supertest(server);
 
-describe('API endpoints', () => {
+describe('API health status', () => {
   it('Should be online', async () => {
     const res = await request.get('/');
 

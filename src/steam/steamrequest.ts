@@ -12,13 +12,14 @@ import {
   ISteamUserTicket,
   SteamOptions,
 } from './steaminterfaces';
-import axios, { AxiosResponse } from 'axios';
 
-export default new (class SteamRequest {
+import { HttpClient } from '@src/lib/httpclient';
+
+export default class SteamRequest {
   private options: SteamOptions;
   private interface: string;
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.options = {
       webkey: constants.webkey,
       url: 'https://partner.steam-api.com/',
@@ -64,7 +65,7 @@ export default new (class SteamRequest {
    * @param steamId
    * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#GetUserInfo
    */
-  steamMicrotransactionGetUserInfo(steamId): Promise<ISteamMicroGetUserInfo> {
+  steamMicrotransactionGetUserInfo(steamId: string): Promise<ISteamMicroGetUserInfo> {
     const data = {
       key: this.options.webkey,
       steamid: steamId,
@@ -124,7 +125,7 @@ export default new (class SteamRequest {
    * @param orderid
    * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#FinalizeTxn
    */
-  steamMicrotransactionFinalizeTransaction(appId, orderid): Promise<ISteamMicroTx> {
+  steamMicrotransactionFinalizeTransaction(appId: string, orderid: string): Promise<ISteamMicroTx> {
     const data = {
       key: this.options.webkey,
       orderid: orderid,
@@ -135,50 +136,30 @@ export default new (class SteamRequest {
   }
 
   private _get<T>(
-    _interface: string,
-    _method: string,
-    _version: number,
-    _data: any,
-    _url: string = this.options.url
+    interf: string,
+    method: string,
+    version: number,
+    data: any,
+    url: string = this.options.url
   ): Promise<T> {
-    const parsed = queryString.stringify(_data);
+    const parsed = queryString.stringify(data);
 
-    const urlRequested = _url + _interface + '/' + _method + '/v' + _version + '/?' + parsed;
-
-    return new Promise<T>((resolve, reject: (val) => void) => {
-      axios
-        .get<T>(urlRequested)
-        .then((value: AxiosResponse<T>) => {
-          resolve(value.data);
-        })
-        .catch(err => {
-          reject(err);
-        });
-    });
+    const urlRequested = `${url}${interf}/${method}/v${version}/?${parsed}`;
+    return this.httpClient.get<T>(urlRequested);
   }
 
   private _post<T>(
-    _interface: string,
-    _method: string,
-    _version: number,
-    _data: any,
-    _url: string = this.options.url
+    interf: string,
+    method: string,
+    version: number,
+    data: any,
+    url: string = this.options.url
   ): Promise<T> {
-    const urlRequested = _url + _interface + '/' + _method + '/v' + _version + '/';
-
-    return new Promise<T>((resolve, reject: (val) => void) => {
-      axios
-        .post<T>(urlRequested, _data, {
-          headers: {
-            'Content-type': 'application/x-www-form-urlencoded',
-          },
-        })
-        .then((value: AxiosResponse<T>) => {
-          resolve(value.data);
-        })
-        .catch(err => {
-          reject(err);
-        });
-    });
+    const urlRequested = `${url}${interf}/${method}/v${version}/`;
+    // eslint-disable-next-line no-console
+    console.log(urlRequested);
+    // eslint-disable-next-line no-console
+    console.log(data);
+    return this.httpClient.post<T>(urlRequested, data);
   }
-})();
+}
