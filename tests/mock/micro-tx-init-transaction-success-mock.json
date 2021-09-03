@@ -1,0 +1,9 @@
+{
+  "response": {
+    "result": "OK",
+    "params": {
+      "orderid": "example-order-id",
+      "transid": "example-return-transaction-id"
+    }
+  }
+}

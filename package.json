@@ -9,9 +9,9 @@
   "scripts": {
     "build": "tsc",
     "build:doc": "apidoc -i src/ -o docs/",
-    "dev": "nodemon --watch \"src/\"  --exec \"ts-node -r tsconfig-paths/register ./src/entrypoint.ts\" -e ts",
+    "dev": "cross-env NODE_ENV=development nodemon --watch \"src/\"  --exec \"ts-node -r tsconfig-paths/register ./src/entrypoint.ts\" -e ts",
     "start": "ts-node -r tsconfig-paths/register ./src/entrypoint.ts",
-    "test": "NODE_ENV=test jest --ci --verbose --silent=false --detectOpenHandles --forceExit",
+    "test": "cross-env NODE_ENV=test jest --ci --verbose --silent=false --detectOpenHandles --forceExit",
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "eslint . --ext .js,.ts --fix"
   },
@@ -34,7 +34,6 @@
   "dependencies": {
     "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
-    "@types/helmet": "^4.0.0",
     "@types/jest": "^26.0.20",
     "@types/node": "^14.14.30",
     "@types/supertest": "^2.0.10",
@@ -44,6 +43,7 @@
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "debug": "^4.3.1",
+    "dotenv": "^10.0.0",
     "eslint": "^7.20.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-import-resolver-alias": "^1.1.2",
@@ -62,10 +62,13 @@
     "ts-jest": "^26.5.1",
     "ts-node": "^9.1.1",
     "tsconfig-paths": "^3.9.0",
-    "typescript": "^4.1.5"
+    "typescript": "^4.1.5",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
+    "@jest-mock/express": "^1.4.4",
     "apidoc": "^0.26.0",
+    "cross-env": "^7.0.3",
     "nodemon": "^2.0.7"
   }
 }

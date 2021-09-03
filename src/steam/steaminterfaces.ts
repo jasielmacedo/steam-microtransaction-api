@@ -35,12 +35,14 @@ export declare interface ISteamOpenTransaction extends ISteamUserRequest {
 }
 
 export declare interface ISteamOwnershipResponse {
-  ownsapp: boolean;
-  permanent: boolean;
-  timestamp: string;
-  ownersteamid: string;
-  sitelicense: boolean;
-  result: string;
+  appownership: {
+    ownsapp: boolean;
+    permanent: boolean;
+    timestamp: string;
+    ownersteamid: string;
+    sitelicense: boolean;
+    result: string;
+  };
 }
 
 export declare interface ISteamMicroGetUserInfo {

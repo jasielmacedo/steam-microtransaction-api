@@ -17,7 +17,7 @@ typings/
 
 # Misc
 .DS_Store
-.env.*
+.env
 .vscode
 .idea
 dist

@@ -20,11 +20,23 @@ This is a Typescript (Nodejs v12+) Based API and you can use services like herok
 
 - Install node v12+
 - Clone or Fork this repository
-- Generate your Steam WEBKEY [https://steamcommunity.com/dev](https://steamcommunity.com/dev)
-- Replace ./src/constants.ts values according with your informations
-- Run ```npm install``` to install the dependencies
-- To test if your webkey is valid run ```npm run test```
-- And to start the application simply run ```npm start```
+- Generate your Steam WEBAPI KEY
+
+To run locally and for tests, duplicate the file `env.example` and renamed it to `.env` and put the correct values on it.
+
+- Run `npm install` to install the dependencies
+- To test if everything is working, just run `npm run test`
+- And to start the application simply run `npm start`
+
+#### Confusion about WEBKEY API generation for Steam In-app purchases
+
+STEAM has two webkeys but to use in Purchases and API in-game, follow the instruction below:
+
+To generate the proper key, you need to implement the WebAPIKey from
+
+- Go to [Steam Developer Page](https://partner.steamgames.com/dashboard)
+- Menu -> User & Permissions -> Manage Groups -> (Your App's name)
+- On the Sidebar there is a link: Generate WebAPI Key
 
 ## Integrate with your game
 
@@ -37,17 +49,17 @@ The flow is:
 - Your game call /InitPurchase endpoint to start the purchase.
 - The game will popup a confirmation dialog (Inside the game)
 - The user buy the item (pay for it)
-- *The game receive a callback confirmation about the purchase
+- \*The game receive a callback confirmation about the purchase
 - Your game call /FinalizePurchase endpoint
 - And That's it
 
-*If the user have parental control and the callback was not called, you can check the status calling the /CheckPurchaseStatus
+\*If the user have parental control and the callback was not called, you can check the status calling the /CheckPurchaseStatus
 
 ### Security check
 
 In-Game Purchases is not complicated but you need to be sure if the steam user is reliable.
 
-To avoid scammers, simply call the /GetReliableUserInfo endpoint if the return is true, you can start the microtransaction. 
+To avoid scammers, simply call the /GetReliableUserInfo endpoint if the return is true, you can start the microtransaction.
 
 ## Example with Unity (C#)
 

@@ -1,0 +1,12 @@
+{
+  "response": {
+    "result": "Failure",
+    "params": {
+      "orderid": "1"
+    },
+    "error": {
+      "errorcode": 7,
+      "errordesc": "User FAKE-ID not logged in"
+    }
+  }
+}
