@@ -1,6 +1,6 @@
-# Steam Microtransaction API [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/jasielmacedo/steam-microtransaction-api) [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/WvB5xYVw)
+# Steam Microtransaction API [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/WvB5xYVw)
 
-
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/jasielmacedo/steam-microtransaction-api)
 
 An intermediate api to handle steam microtransactions (In Game Purchases) using steam web services.
 
