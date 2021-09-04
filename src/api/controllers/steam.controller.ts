@@ -21,7 +21,7 @@ export default {
         success,
       });
     } catch (err) {
-      res.status(500).json({ error: err.message || 'Something went wrong' });
+      res.status(403).json({ error: err.message || 'Something went wrong' });
     }
   },
   checkAppOwnership: async (req: Request, res: Response): Promise<void> => {
@@ -44,7 +44,7 @@ export default {
         success: data.appownership.result == 'OK' && data.appownership.ownsapp,
       });
     } catch (err) {
-      res.status(500).json({ error: err.message || 'Something went wrong' });
+      res.status(403).json({ error: err.message || 'Something went wrong' });
     }
   },
   initPurchase: async (req: Request, res: Response): Promise<void> => {
@@ -82,7 +82,7 @@ export default {
         res.status(400).json({ error: 'Something went wrong with the steam partner api' });
       }
     } catch (err) {
-      res.status(500).json({ error: err.message || 'Something went wrong' });
+      res.status(403).json({ error: err.message || 'Something went wrong' });
     }
   },
   checkPurchaseStatus: async (req: Request, res: Response): Promise<void> => {
@@ -101,7 +101,7 @@ export default {
         res.status(200).json({ success: true, ...data.response.params });
       else res.status(400).json({ error: 'Something went wrong on the Steam API' });
     } catch (err) {
-      res.status(500).json({ error: err.message || 'Something went wrong' });
+      res.status(403).json({ error: err.message || 'Something went wrong' });
     }
   },
   finalizePurchase: async (req: Request, res: Response): Promise<void> => {
@@ -120,7 +120,7 @@ export default {
         success: data.response.result == 'OK',
       });
     } catch (err) {
-      res.status(400).json({ error: err.message || 'Something went wrong' });
+      res.status(403).json({ error: err.message || 'Something went wrong' });
     }
   },
 };
