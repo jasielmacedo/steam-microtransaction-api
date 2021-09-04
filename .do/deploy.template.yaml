@@ -1,0 +1,17 @@
+spec:
+  name: steam-microtransaction-api
+  services:
+    - name: microtransaction-api
+      git:
+        branch: main
+        repo_clone_url: https://github.com/jasielmacedo/steam-microtransaction-api.git
+      envs:
+        - key: STEAM_WEBKEY
+          value: ''
+          type: SECRET
+        - key: STEAM_CURRENCY
+          value: 'USD'
+          type: SECRET
+        - key: STEAM_ITEM_LOCALE
+          value: 'en'
+          type: SECRET

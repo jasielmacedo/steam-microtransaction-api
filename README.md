@@ -2,6 +2,8 @@
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/jasielmacedo/steam-microtransaction-api)
 
+[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jasielmacedo/steam-microtransaction-api/tree/main)
+
 An intermediate api to handle steam microtransactions (In Game Purchases) using steam web services.
 
 You can use and consume this API with Unity, Unreal, Godot or any engine you want to develop a steam game.
@@ -12,7 +14,7 @@ If you want to implement micro-transactions in your game you need to create a we
 
 To save time and money, I decided to create one unique code to help game developers to implement microtransactions quickly.
 
-With this repository you can use Heroku to deploy your own api without problem. See [Heroku git deploy](https://devcenter.heroku.com/articles/git)
+With this repository you can use Heroku or Digital Ocean to deploy your own api with few clicks. See [Heroku git deploy](https://devcenter.heroku.com/articles/git) or [Digital Ocean Deploy](https://docs.digitalocean.com/products/app-platform/quickstart/#destroy-an-app)
 
 ## How to start the API?
 
