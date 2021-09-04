@@ -8,13 +8,24 @@ An intermediate api to handle steam microtransactions (In Game Purchases) using 
 
 You can use and consume this API with Unity, Unreal, Godot or any engine you want to develop a steam game.
 
-## What is this?
+## READ BEFORE USE
 
-If you want to implement micro-transactions in your game you need to create a webservice to handle and request the Steam WEB API.
+This Bridge API is created based on the Steam Partner API recommendations.
+
+If you have to implement micro-transactions in your game **YOU MUST CREATE** a webservice to handle and request the Steam WEB API and This is the purpose of this repository.
 
 To save time and money, I decided to create one unique code to help game developers to implement microtransactions quickly.
 
-With this repository you can use Heroku or Digital Ocean to deploy your own api with few clicks. See [Heroku git deploy](https://devcenter.heroku.com/articles/git) or [Digital Ocean Deploy](https://docs.digitalocean.com/products/app-platform/quickstart/#destroy-an-app)
+With this repository you can use Heroku or Digital Ocean to deploy your own api with few clicks. See [Heroku git deploy](https://devcenter.heroku.com/articles/git) or [Digital Ocean Deploy](https://docs.digitalocean.com/products/app-platform/quickstart/#destroy-an-app) or whatever host you choose.
+
+## WHY I NEED TO USE THIS REPO OR CREATE MY OWN? CAN I MAKE REQUESTS DIRECTLY FROM MY GAME?
+
+First of all, is important to read the Steam recommendations about this topic.
+[https://partner.steamgames.com/doc/features/microtransactions](https://partner.steamgames.com/doc/features/microtransactions)
+
+Steam doesn't recommend you to call the Steam Partner api directly from your game. You have to create your own API to act like a bridge between your game and the steam.
+
+Again, that's is the purpose of this API repo.
 
 ## How to start the API?
 
