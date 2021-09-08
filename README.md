@@ -25,7 +25,7 @@ First of all, is important to read the Steam recommendations about this topic.
 
 Steam doesn't recommend you to call the Steam Partner api directly from your game. You have to create your own API to act like a bridge between your game and the steam.
 
-Again, that's is the purpose of this API repo.
+Again, that's the purpose of this API repo.
 
 ## How to start the API?
 
