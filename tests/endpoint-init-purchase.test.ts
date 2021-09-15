@@ -14,9 +14,9 @@ import microTxInitTransactionSuccessMock from './mock/micro-tx-init-transaction-
 describe('Controller Test: /InitPurchase', () => {
   const body = {
     appId: '480',
-    orderId: '1',
-    currency: 199,
-    itemId: 'abc',
+    orderId: 1000,
+    amount: 199,
+    itemId: 100,
     itemDescription: 'abcd',
     category: 'gold',
     steamId: VALID_USER_STEAM_ID,

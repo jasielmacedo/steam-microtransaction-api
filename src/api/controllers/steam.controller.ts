@@ -51,14 +51,19 @@ export default {
     const {
       appId,
       category,
-      currency,
+      amount,
       itemDescription,
       itemId,
       orderId,
       steamId,
     }: ISteamOpenTransaction = <ISteamOpenTransaction>{ ...req.body };
 
-    if (!appId || !category || !currency || !itemDescription || !itemId || !orderId || !steamId) {
+    if (!amount) {
+      res.status(400).json({
+        error: 'Amount is a required field',
+      });
+      return;
+    } else if (!appId || !category || !itemDescription || !itemId || !orderId || !steamId) {
       res.status(400).json({
         error: 'Missing fields',
       });
@@ -69,7 +74,7 @@ export default {
       const data = await req.steam.steamMicrotransactionInitWithOneItem({
         appId,
         category,
-        currency,
+        amount,
         itemDescription,
         itemId,
         orderId,
