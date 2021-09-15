@@ -85,9 +85,9 @@ export default (app: Express): void => {
      * @apiHeader {String} content-type application/json *required
      * 
      * @apiParam  (json) {String} appId string,
-     * @apiParam  (json) {String} orderId string,
-     * @apiParam  (json) {String} currency number, 
-     * @apiParam  (json) {Integer} itemId string,
+     * @apiParam  (json) {String} orderId number,
+     * @apiParam  (json) {String} amount number, 
+     * @apiParam  (json) {Integer} itemId number,
      * @apiParam  (json) {String} itemDescription string,
      * @apiParam  (json) {String} category string,
      * @apiParam  (json) {String} steamId User Steam ID
@@ -98,7 +98,7 @@ export default (app: Express): void => {
      * {
      *      appId: '480',
      *      orderId: '1',
-     *      currency: 199, 
+     *      amount: 199, 
      *      itemId: 11222,
      *      itemDescription: 'abcd',
      *      category: 'gold',
