@@ -1,3 +1,5 @@
+import products from './products.json';
+
 export default {
   /**
    *  Don't forget to generate your own steam webkey
@@ -5,6 +7,11 @@ export default {
    *  Steam Developer Page, User&Permissions -> Manage Group -> (Your App's name)
    */
   webkey: process.env.STEAM_WEBKEY,
+  /**
+   *  Define the list of products to be used by the transaction system to prevent users to send lower or higher price
+   *  for these products.
+   */
+  products,
   /**
    * Useful during transaction creation
    * Steam automatically converts from this currency to the user local currency.

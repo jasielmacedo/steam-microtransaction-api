@@ -41,6 +41,12 @@ To run locally and for tests, duplicate the file `env.example` and renamed it to
 - To test if everything is working, just run `npm run test`
 - And to start the application simply run `npm start`
 
+## List of Products
+
+To prevent users from sending arbitrary amount for products there is a file called products.json on the `src/`
+
+Don't fortget to replace the id and amount according with your list of products.
+
 #### Confusion about WEBKEY API generation for Steam In-app purchases
 
 STEAM has two webkeys but to use in Purchases and API in-game, follow the instruction below:
