@@ -1,6 +1,8 @@
 import constants from '@src/constants';
 import queryString from 'query-string';
 
+import FormData from 'form-data';
+
 import {
   ISteamMicroGetUserInfo,
   ISteamMicroTx,
@@ -83,23 +85,28 @@ export default class SteamRequest {
   steamMicrotransactionInitWithOneItem(
     _transaction: ISteamOpenTransaction
   ): Promise<ISteamMicroTx> {
-    const data = {
-      key: this.options.webkey,
-      orderid: _transaction.orderId,
-      steamid: _transaction.steamId,
-      appid: _transaction.appId,
-      itemcount: 1,
-      currency: constants.currency,
-      language: constants.locale,
-      usersession: 'client',
-      'itemid[0]': _transaction.itemId,
-      'qty[0]': 1,
-      'amount[0]': _transaction.amount + constants.currency,
-      'description[0]': _transaction.itemDescription,
-      'category[0]': _transaction.category,
-    };
+    const formData = new FormData();
+    formData.append('key', this.options.webkey);
+    formData.append('orderid', _transaction.orderId);
+    formData.append('steamid', _transaction.steamId);
+    formData.append('appid', _transaction.appId);
+    formData.append('itemcount', '1');
+    formData.append('currency', constants.currency);
+    formData.append('language', constants.locale);
+    formData.append('usersession', 'client');
+    formData.append('itemid[0]', _transaction.itemId);
+    formData.append('qty[0]', '1');
+    formData.append('amount[0]', _transaction.amount + constants.currency);
+    formData.append('description[0]', _transaction.itemDescription);
+    formData.append('category[0]', _transaction.category);
 
-    return this._post<ISteamMicroTx>(this.interface, 'InitTxn', 3, data);
+    return this._post<ISteamMicroTx>(
+      this.interface,
+      'InitTxn',
+      3,
+      formData,
+      `https://api.steampowered.com/`
+    );
   }
 
   /**

@@ -16,7 +16,7 @@ describe('Controller Test: /InitPurchase', () => {
     appId: '480',
     orderId: 1000,
     amount: 199,
-    itemId: 100,
+    itemId: 1001,
     itemDescription: 'abcd',
     category: 'gold',
     steamId: VALID_USER_STEAM_ID,

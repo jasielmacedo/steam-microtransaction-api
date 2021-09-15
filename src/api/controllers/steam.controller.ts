@@ -1,5 +1,8 @@
+import constants from '@src/constants';
 import { ISteamOpenTransaction, ISteamTransaction } from '@src/steam/steaminterfaces';
 import { Request, Response } from 'express';
+
+import { chain } from 'lodash';
 
 export default {
   getReliableUserInfo: async (req: Request, res: Response): Promise<void> => {
@@ -48,24 +51,25 @@ export default {
     }
   },
   initPurchase: async (req: Request, res: Response): Promise<void> => {
-    const {
-      appId,
-      category,
-      amount,
-      itemDescription,
-      itemId,
-      orderId,
-      steamId,
-    }: ISteamOpenTransaction = <ISteamOpenTransaction>{ ...req.body };
+    const { appId, category, itemDescription, itemId, orderId, steamId }: ISteamOpenTransaction = <
+      ISteamOpenTransaction
+    >{ ...req.body };
 
-    if (!amount) {
-      res.status(400).json({
-        error: 'Amount is a required field',
-      });
-      return;
-    } else if (!appId || !category || !itemDescription || !itemId || !orderId || !steamId) {
+    if (!appId || !category || !itemDescription || !itemId || !orderId || !steamId) {
       res.status(400).json({
         error: 'Missing fields',
+      });
+      return;
+    }
+
+    const product = chain(constants.products)
+      .filter(p => p.id.toString() == itemId)
+      .first()
+      .value();
+
+    if (!product) {
+      res.status(400).json({
+        error: 'ItemId not found',
       });
       return;
     }
@@ -74,7 +78,7 @@ export default {
       const data = await req.steam.steamMicrotransactionInitWithOneItem({
         appId,
         category,
-        amount,
+        amount: product.price,
         itemDescription,
         itemId,
         orderId,

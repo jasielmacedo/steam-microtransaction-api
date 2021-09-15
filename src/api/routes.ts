@@ -86,7 +86,6 @@ export default (app: Express): void => {
      * 
      * @apiParam  (json) {String} appId string,
      * @apiParam  (json) {String} orderId number,
-     * @apiParam  (json) {String} amount number, 
      * @apiParam  (json) {Integer} itemId number,
      * @apiParam  (json) {String} itemDescription string,
      * @apiParam  (json) {String} category string,
@@ -97,9 +96,7 @@ export default (app: Express): void => {
      * @apiParamExample {json} Request-Example:
      * {
      *      appId: '480',
-     *      orderId: '1',
-     *      amount: 199, 
-     *      itemId: 11222,
+     *      itemId: 1001,
      *      itemDescription: 'abcd',
      *      category: 'gold',
      *      steamID: '765443152131231231',
