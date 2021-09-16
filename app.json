@@ -1,0 +1,19 @@
+{
+  "name": "Steam Microtransaction Intermediate API",
+  "description": "An API to be called on the game to start Microtransactions.",
+  "env": {
+    "STEAM_WEBKEY": {
+      "description": "Steam Developer WebAPI Key",
+      "value": ""
+    },
+    "STEAM_CURRENCY": {
+      "description": "Currency for microtransactions",
+      "value": "USD"
+    },
+    "STEAM_ITEM_LOCALE": {
+      "description": "Localization",
+      "value": "en"
+    }
+  },
+  "repository": "https://github.com/jasielmacedo/steam-microtransaction-api"
+}

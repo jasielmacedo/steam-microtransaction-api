@@ -88,7 +88,11 @@ export default {
       if (data.response.result == 'OK' && data.response.params.transid) {
         res.status(200).json({ transid: data.response.params.transid });
       } else {
-        res.status(400).json({ error: 'Something went wrong with the steam partner api' });
+        res.status(400).json({
+          transid: null,
+          error:
+            data.response?.error?.errordesc || 'Something went wrong with the steam partner api',
+        });
       }
     } catch (err) {
       res.status(403).json({ error: err.message || 'Something went wrong' });
@@ -108,9 +112,13 @@ export default {
 
       if (data.response.result == 'OK')
         res.status(200).json({ success: true, ...data.response.params });
-      else res.status(400).json({ error: 'Something went wrong on the Steam API' });
+      else
+        res.status(400).json({
+          success: false,
+          error: data.response?.error?.errordesc || 'Something went wrong on the Steam API',
+        });
     } catch (err) {
-      res.status(403).json({ error: err.message || 'Something went wrong' });
+      res.status(403).json({ success: false, error: err.message || 'Something went wrong' });
     }
   },
   finalizePurchase: async (req: Request, res: Response): Promise<void> => {
@@ -127,6 +135,7 @@ export default {
 
       res.status(200).json({
         success: data.response.result == 'OK',
+        ...(data.response?.error ? { error: data.response?.error?.errordesc } : {}),
       });
     } catch (err) {
       res.status(403).json({ error: err.message || 'Something went wrong' });

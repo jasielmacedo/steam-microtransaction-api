@@ -51,7 +51,7 @@ describe('Controller Test: /InitPurchase', () => {
     expect(res.status).toHaveBeenCalledWith(400);
 
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: 'Something went wrong with the steam partner api' })
+      expect.objectContaining({ error: 'User FAKE-ID not logged in' })
     );
   });
 });
