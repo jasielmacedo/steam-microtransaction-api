@@ -1,8 +1,6 @@
 import constants from '@src/constants';
 import queryString from 'query-string';
 
-import FormData from 'form-data';
-
 import {
   ISteamMicroGetUserInfo,
   ISteamMicroTx,
@@ -85,7 +83,7 @@ export default class SteamRequest {
   steamMicrotransactionInitWithOneItem(
     _transaction: ISteamOpenTransaction
   ): Promise<ISteamMicroTx> {
-    const formData = new FormData();
+    const formData = new URLSearchParams();
     formData.append('key', this.options.webkey);
     formData.append('orderid', _transaction.orderId);
     formData.append('steamid', _transaction.steamId);
