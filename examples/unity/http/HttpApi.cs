@@ -50,6 +50,8 @@ namespace Jazz.http
                 Method = method
             };
 
+            Debug.Log(JsonUtility.ToJson(args));
+
             if (allowQueueing && _apiCallQueue != null)
             {
                 for (var i = _apiCallQueue.Count - 1; i >= 0; i--)

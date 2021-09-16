@@ -9,6 +9,7 @@ using System.Collections.Generic;
 public class Microtransaction : MonoBehaviour
 {
     [SerializeField] private HttpSettingsEditor clientSettings;
+    [SerializeField] private string appId = "480";
 
     // finish transaction callback
     protected Callback<MicroTxnAuthorizationResponse_t> m_MicroTxnAuthorizationResponse;
@@ -26,6 +27,8 @@ public class Microtransaction : MonoBehaviour
        m_MicroTxnAuthorizationResponse = Callback<MicroTxnAuthorizationResponse_t>.Create(OnMicroTxnAuthorizationResponse); 
 
        m_internalHttpApi = new HttpApi(clientSettings.GenerateSettings());
+
+       currentOrder += Random.Range(1000000,100000000);
     }
 
     // unity update function
@@ -68,15 +71,12 @@ public class Microtransaction : MonoBehaviour
     {
         string userId = SteamUser.GetSteamID().ToString();
 
-        String orderId = currentOrder;
-
-        HttpRequestArgs argsRequest = new HttpRequestArgs();
-        argsRequest.data.Add("itemId", "item_id_1");
-        argsRequest.data.Add("steamUser", userId);
-        argsRequest.data.Add("currency", 199); // equal to $1.99
-        argsRequest.data.Add("orderId", orderId);
-        argsRequest.data.Add("itemDescription","1000 Coins");
-        argsRequest.data.Add("category","Gold");
+        InitPurchaseArgs argsRequest = new InitPurchaseArgs();
+        argsRequest.itemId = "1001";
+        argsRequest.steamId = userId;
+        argsRequest.orderId = currentOrder.ToString();
+        argsRequest.itemDescription = "1000 Coins";
+        argsRequest.category = "Gold";
 
         // you can use your own library to call the API if you want to.
         this.MakeApiCall("InitPurchase",argsRequest, (HttpJsonResponse response) => 
@@ -93,14 +93,14 @@ public class Microtransaction : MonoBehaviour
             },true,HttpRequestContainerType.POST);
     }
 
-    public void FinishPurchase(string OrderId)
+    public void FinishPurchase(string orderId)
     {
-        HttpRequestArgs argsRequest = new HttpRequestArgs();
-        argsRequest.data.Add("orderId", orderId.ToString());
+        PurchaseArgs argsRequest = new PurchaseArgs();
+        argsRequest.orderId = orderId.ToString();
 
         this.MakeApiCall("FinalizePurchase",argsRequest, (HttpJsonResponse response) => 
             {
-                ApiReturnTransaction ret = JsonUtility.FromJson<ApiReturn>(response.rawResponse);
+                ApiReturn ret = JsonUtility.FromJson<ApiReturn>(response.rawResponse);
                 if(ret.success)
                 {
                     // after confirmation, you can give the item for the player
@@ -123,21 +123,32 @@ public class Microtransaction : MonoBehaviour
             args = args ?? new HttpRequestArgs();
 
             // steam app id
-            args.data.Add("appId", "480");
+            args.appId = this.appId;
 
             m_internalHttpApi.MakeApiCall(apiEndPoint, args, successCallback,errorCallback,extraHeaders,requestType,allowQueueing);
         }         
-    }
-
-    public class ApiReturnTransaction
-    {
-        public string transid;
-        public string error;
     }
 
     public class ApiReturn
     {
         public bool success;
         public string error;
+    }
+
+    public class ApiReturnTransaction : ApiReturn
+    {
+        public string transid;
+    }
+
+    public class PurchaseArgs : HttpRequestArgs {
+        public string orderId;
+        public string transId;
+    } 
+
+    public class InitPurchaseArgs : PurchaseArgs {
+        public string itemId;
+        public string steamId;
+        public string category;
+        public string itemDescription;
     }
 }
