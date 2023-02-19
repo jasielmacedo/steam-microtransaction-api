@@ -29,17 +29,17 @@ Again, that's the purpose of this API repo.
 
 ## How to start the API?
 
-This is a Typescript (Nodejs v12+) Based API and you can use services like heroku, digital ocean to publish this API.
+This is a Typescript (Nodejs v18+) Based API and you can use services like heroku, digital ocean to publish this API.
 
-- Install node v12+
+- Install node v18+
 - Clone or Fork this repository
 - Generate your Steam WEBAPI KEY
 
 To run locally and for tests, duplicate the file `env.example` and renamed it to `.env` and put the correct values on it.
 
-- Run `npm install` to install the dependencies
-- To test if everything is working, just run `npm run test`
-- And to start the application simply run `npm start`
+- Run `yarn` to install the dependencies
+- To test if everything is working, just run `yarn test`
+- And to start the application simply run `yarn start`
 
 ## List of Products
 

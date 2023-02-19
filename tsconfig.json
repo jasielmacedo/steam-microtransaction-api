@@ -3,18 +3,19 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "resolveJsonModule": true,
-    "lib": ["es2017"],
+    "lib": ["es2022"],
     "removeComments": true,
     "moduleResolution": "node",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "sourceMap": true,
-    "target": "es2017",
+    "target": "es2022",
     "outDir": "dist",
     "inlineSources": true,
     "esModuleInterop": true,
     "sourceRoot": "/",
     "baseUrl": "./",
+    "skipLibCheck": true,
     "paths": {
       "@api/*": ["src/api/*"],
       "@thirdparty/*": ["src/thirdparty/*"],
@@ -23,5 +24,5 @@
     }
   },
   "include": ["./**/*.ts"],
-  "exclude": [".vscode/**/*"]
+  "exclude": ["_warmup/**/*", ".vscode/**/*", "node_modules", "*.js"]
 }
