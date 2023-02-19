@@ -4,6 +4,17 @@ import { Request, Response } from 'express';
 
 import { chain } from 'lodash';
 
+const validateError = (res: Response<any, Record<string, any>>, err: any) => {
+  const status = err?.response && 'status' in err?.response ? err.response.status : 400;
+
+  if (status === 403) {
+    res.status(403).json({ error: 'Invalid Steam WebKey' });
+    return;
+  }
+
+  res.status(status).json({ error: err.message || 'Something went wrong' });
+};
+
 export default {
   getReliableUserInfo: async (req: Request, res: Response): Promise<void> => {
     const { steamId } = req.body;
@@ -20,11 +31,15 @@ export default {
       const success =
         data.response.result == 'OK' &&
         (data.response.params.status == 'Active' || data.response.params.status == 'Trusted');
+
+      if (!success)
+        throw new Error(data.response?.error?.errordesc ?? 'Steam API returned unknown error');
+
       res.status(200).json({
         success,
       });
     } catch (err) {
-      res.status(403).json({ error: err.message || 'Something went wrong' });
+      validateError(res, err);
     }
   },
   checkAppOwnership: async (req: Request, res: Response): Promise<void> => {
@@ -43,11 +58,15 @@ export default {
         steamId,
       });
 
+      const success = data.appownership.result == 'OK' && data.appownership.ownsapp;
+
+      if (!success) throw new Error('The specified steamId has not purchased the provided appId');
+
       res.status(200).json({
         success: data.appownership.result == 'OK' && data.appownership.ownsapp,
       });
     } catch (err) {
-      res.status(403).json({ error: err.message || 'Something went wrong' });
+      validateError(res, err);
     }
   },
   initPurchase: async (req: Request, res: Response): Promise<void> => {
@@ -69,7 +88,7 @@ export default {
 
     if (!product) {
       res.status(400).json({
-        error: 'ItemId not found',
+        error: 'ItemId not found in the game database',
       });
       return;
     }
@@ -85,17 +104,14 @@ export default {
         steamId,
       });
 
-      if (data.response.result == 'OK' && data.response.params.transid) {
-        res.status(200).json({ transid: data.response.params.transid });
-      } else {
-        res.status(400).json({
-          transid: null,
-          error:
-            data.response?.error?.errordesc || 'Something went wrong with the steam partner api',
-        });
-      }
+      const success = data.response.result == 'OK' && data.response.params.transid;
+
+      if (!success)
+        throw new Error(data.response?.error?.errordesc ?? 'Steam API returned unknown error');
+
+      res.status(200).json({ transid: data.response.params.transid });
     } catch (err) {
-      res.status(403).json({ error: err.message || 'Something went wrong' });
+      validateError(res, err);
     }
   },
   checkPurchaseStatus: async (req: Request, res: Response): Promise<void> => {
@@ -110,15 +126,12 @@ export default {
     try {
       const data = await req.steam.steamMicrotransactionCheckRequest({ appId, orderId, transId });
 
-      if (data.response.result == 'OK')
-        res.status(200).json({ success: true, ...data.response.params });
-      else
-        res.status(400).json({
-          success: false,
-          error: data.response?.error?.errordesc || 'Something went wrong on the Steam API',
-        });
+      if (data.response?.result != 'OK')
+        throw new Error(data.response?.error?.errordesc ?? 'Steam API returned unknown error');
+
+      res.status(200).json({ success: true, ...data.response.params });
     } catch (err) {
-      res.status(403).json({ success: false, error: err.message || 'Something went wrong' });
+      validateError(res, err);
     }
   },
   finalizePurchase: async (req: Request, res: Response): Promise<void> => {
@@ -138,7 +151,7 @@ export default {
         ...(data.response?.error ? { error: data.response?.error?.errordesc } : {}),
       });
     } catch (err) {
-      res.status(403).json({ error: err.message || 'Something went wrong' });
+      validateError(res, err);
     }
   },
 };

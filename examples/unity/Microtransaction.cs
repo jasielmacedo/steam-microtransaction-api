@@ -9,7 +9,7 @@ using System.Collections.Generic;
 public class Microtransaction : MonoBehaviour
 {
     [SerializeField] private HttpSettingsEditor clientSettings;
-    [SerializeField] private string appId = "480";
+    [SerializeField] private string appId = "480"; // replace by your own appId
 
     // finish transaction callback
     protected Callback<MicroTxnAuthorizationResponse_t> m_MicroTxnAuthorizationResponse;

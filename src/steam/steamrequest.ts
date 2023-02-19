@@ -14,6 +14,7 @@ import {
 } from './steaminterfaces';
 
 import { HttpClient } from '@src/lib/httpclient';
+import { toFormData } from 'axios';
 
 export default class SteamRequest {
   private options: SteamOptions;
@@ -80,23 +81,21 @@ export default class SteamRequest {
    * @params _transaction
    * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#InitTxn
    */
-  steamMicrotransactionInitWithOneItem(
-    _transaction: ISteamOpenTransaction
-  ): Promise<ISteamMicroTx> {
+  steamMicrotransactionInitWithOneItem(transaction: ISteamOpenTransaction): Promise<ISteamMicroTx> {
     const formData = new URLSearchParams();
     formData.append('key', this.options.webkey);
-    formData.append('orderid', _transaction.orderId);
-    formData.append('steamid', _transaction.steamId);
-    formData.append('appid', _transaction.appId);
+    formData.append('orderid', transaction.orderId);
+    formData.append('steamid', transaction.steamId);
+    formData.append('appid', transaction.appId);
     formData.append('itemcount', '1');
     formData.append('currency', constants.currency);
     formData.append('language', constants.locale);
     formData.append('usersession', 'client');
-    formData.append('itemid[0]', _transaction.itemId);
+    formData.append('itemid[0]', transaction.itemId);
     formData.append('qty[0]', '1');
-    formData.append('amount[0]', _transaction.amount + constants.currency);
-    formData.append('description[0]', _transaction.itemDescription);
-    formData.append('category[0]', _transaction.category);
+    formData.append('amount[0]', transaction.amount + constants.currency);
+    formData.append('description[0]', transaction.itemDescription);
+    formData.append('category[0]', transaction.category);
 
     return this._post<ISteamMicroTx>(
       this.interface,
@@ -137,7 +136,7 @@ export default class SteamRequest {
       appid: appId,
     };
 
-    return this._post<ISteamMicroTx>(this.interface, 'FinalizeTxn', 2, data);
+    return this._post<ISteamMicroTx>(this.interface, 'FinalizeTxn', 2, toFormData(data));
   }
 
   private _get<T>(
