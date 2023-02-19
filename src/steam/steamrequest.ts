@@ -14,7 +14,6 @@ import {
 } from './steaminterfaces';
 
 import { HttpClient } from '@src/lib/httpclient';
-import { toFormData } from 'axios';
 
 export default class SteamRequest {
   private options: SteamOptions;
@@ -130,13 +129,12 @@ export default class SteamRequest {
    * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#FinalizeTxn
    */
   steamMicrotransactionFinalizeTransaction(appId: string, orderid: string): Promise<ISteamMicroTx> {
-    const data = {
-      key: this.options.webkey,
-      orderid: orderid,
-      appid: appId,
-    };
+    const formData = new URLSearchParams();
+    formData.append('key', this.options.webkey);
+    formData.append('orderid', orderid);
+    formData.append('appid', appId);
 
-    return this._post<ISteamMicroTx>(this.interface, 'FinalizeTxn', 2, toFormData(data));
+    return this._post<ISteamMicroTx>(this.interface, 'FinalizeTxn', 2, formData);
   }
 
   private _get<T>(
