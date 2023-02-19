@@ -1,6 +1,6 @@
 {
   "name": "steam-microtransaction-api",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "An intermediate api to handle steam microtransactions using steam web services.",
   "main": "./src/entrypoint.ts",
   "directories": {
