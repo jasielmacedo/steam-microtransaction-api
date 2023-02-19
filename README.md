@@ -6,91 +6,83 @@
 
 An intermediate api to handle steam microtransactions (In Game Purchases) using steam web services.
 
-You can use and consume this API with Unity, Unreal, Godot or any engine you want to develop a steam game.
+You can use this repo to fork and host an API to be used with Unity, Unreal, Godot or any engine you want to develop a steam game.
 
 ## READ BEFORE USE
 
-This Bridge API is created based on the Steam Partner API recommendations.
+This Bridge API has been created based on the Steam Partner API recommendations.
 
-If you have to implement micro-transactions in your game **YOU MUST CREATE** a webservice to handle and request the Steam WEB API and This is the purpose of this repository.
+If you need to implement microtransactions in your game, **you must create** a web service to handle and request the Steam WEB API, and that's precisely the purpose of this repository.
 
-To save time and money, I decided to create one unique code to help game developers to implement microtransactions quickly.
+To help game developers save time and money, I've created a single code that enables them to implement microtransactions quickly.
 
-With this repository you can use Heroku or Digital Ocean to deploy your own api with few clicks. See [Heroku git deploy](https://devcenter.heroku.com/articles/git) or [Digital Ocean Deploy](https://docs.digitalocean.com/products/app-platform/quickstart/#destroy-an-app) or whatever host you choose.
+With this repository, you can use Heroku or Digital Ocean to deploy your own API with just a few clicks. See [Heroku git deploy](https://devcenter.heroku.com/articles/git) or [Digital Ocean Deploy](https://docs.digitalocean.com/products/app-platform/quickstart/#destroy-an-app), or choose any other host you prefer.
 
-## WHY I NEED TO USE THIS REPO OR CREATE MY OWN? CAN I MAKE REQUESTS DIRECTLY FROM MY GAME?
+## WHY DO I NEED TO USE THIS REPO OR CREATE MY OWN? CAN I MAKE REQUESTS DIRECTLY FROM MY GAME?
 
-First of all, is important to read the Steam recommendations about this topic.
-[https://partner.steamgames.com/doc/features/microtransactions](https://partner.steamgames.com/doc/features/microtransactions)
+First of all, it's important to read Steam's recommendations on this topic: [https://partner.steamgames.com/doc/features/microtransactions](https://partner.steamgames.com/doc/features/microtransactions)
 
-Steam doesn't recommend you to call the Steam Partner api directly from your game. You have to create your own API to act like a bridge between your game and the steam.
+Steam doesn't recommend calling the Steam Partner API directly from your game. Instead, you should create your own API to act as a bridge between your game and Steam. That's the purpose of this API repository.
 
-Again, that's the purpose of this API repo.
+## HOW TO START THE API?
 
-## How to start the API?
+This is a TypeScript (Node.js v18+) based API, and you can use services like Heroku or Digital Ocean to publish it.
 
-This is a Typescript (Nodejs v18+) Based API and you can use services like heroku, digital ocean to publish this API.
+To get started, follow these steps:
 
-- Install node v18+
-- Clone or Fork this repository
-- Generate your Steam WEBAPI KEY
+1.  Install Node.js v18+.
+2.  Clone or fork this repository.
+3.  Generate your Steam WEB API key.
 
-To run locally and for tests, duplicate the file `env.example` and renamed it to `.env` and put the correct values on it.
+To run the API locally and for testing, duplicate the file `env.example` and rename it to `.env`, and then update it with the correct values.
 
-- Run `yarn` to install the dependencies
-- To test if everything is working, just run `yarn test`
-- And to start the application simply run `yarn start`
+4.  Run `yarn` to install the dependencies.
+5.  To test if everything is working, run `yarn test`.
+6.  To start the application, run `yarn start`.
 
-## List of Products
+### CONFUSION ABOUT WEBKEY API GENERATION FOR STEAM IN-APP PURCHASES
 
-To prevent users from sending arbitrary amount for products there is a file called products.json on the `src/`
+There is some confusion about which webkey to use for Steam in-app purchases and API in-game. Here are the instructions for generating the correct key:
 
-Don't fortget to replace the id and amount according with your list of products.
+1.  Go to the [Steam Developer Page](https://partner.steamgames.com/dashboard).
+2.  Click on the "Menu" button, and then select "User & Permissions."
+3.  Click on "Manage Groups" and select your app's name.
+4.  On the sidebar, you'll see a link that says "Generate WebAPI Key." Click on that link to generate the proper key.
 
-#### Confusion about WEBKEY API generation for Steam In-app purchases
+## LIST OF PRODUCTS
 
-STEAM has two webkeys but to use in Purchases and API in-game, follow the instruction below:
+To prevent users from sending arbitrary amounts for products, there is a file called `products.json` in the `src/` directory. Make sure to replace the ID and amount according to your list of products.
 
-To generate the proper key, you need to implement the WebAPIKey from
+## INTEGRATING WITH YOUR GAME
 
-- Go to [Steam Developer Page](https://partner.steamgames.com/dashboard)
-- Menu -> User & Permissions -> Manage Groups -> (Your App's name)
-- On the Sidebar there is a link: Generate WebAPI Key
+You can check the documentation of this API here: [https://jasielmacedo.github.io/steam-microtransaction-api/](https://jasielmacedo.github.io/steam-microtransaction-api/)
 
-## Integrate with your game
+The flow is as follows:
 
-You can check the documentation of this API here
-[https://jasielmacedo.github.io/steam-microtransaction-api/](https://jasielmacedo.github.io/steam-microtransaction-api/)
+1.  The user (player) clicks on the UI product.
+2.  Your game calls the `/InitPurchase` endpoint to start the purchase.
+3.  The game will display a confirmation dialog (inside the game).
+4.  The user buys the item (pays for it).
+5.  The game receives a callback confirmation about the purchase.
+6.  Your game calls the `/FinalizePurchase` endpoint.
+7.  That's it.
 
-The flow is:
+If the user has parental control and the callback was not called, you can check the status by calling the `/CheckPurchaseStatus` endpoint.
 
-- The user (player) clicks on the UI product
-- Your game call /InitPurchase endpoint to start the purchase.
-- The game will popup a confirmation dialog (Inside the game)
-- The user buy the item (pay for it)
-- \*The game receive a callback confirmation about the purchase
-- Your game call /FinalizePurchase endpoint
-- And That's it
+### SECURITY CHECK
 
-\*If the user have parental control and the callback was not called, you can check the status calling the /CheckPurchaseStatus
+In-game purchases are not complicated, but you need to be sure that the Steam user is reliable. To avoid scammers, simply call the `/GetReliableUserInfo` endpoint. If the return is true, you can start the microtransaction.
 
-### Security check
+## EXAMPLE WITH UNITY (C#)
 
-In-Game Purchases is not complicated but you need to be sure if the steam user is reliable.
+You can check the example folder to see an example using Unity.
 
-To avoid scammers, simply call the /GetReliableUserInfo endpoint if the return is true, you can start the microtransaction.
+## ABOUT
 
-## Example with Unity (C#)
+Maybe you're thinking, "Have you tested this code properly?" Well, I used a similar version of this code inside a game called Deliverace. It's not available on Steam anymore, but this code works.
 
-You can check example folder to see an example using unity
+If you have any questions, suggestions, or issues, you can use the Issues area.
 
-## About
+## CONTRIBUTION
 
-Ok, maybe you are thinking: "Have you tested this code properly?" Well I used a similar version of this code inside a game called Deliverace.
-It's not available on steam anymore, but this code works.
-
-If you have any question, suggestion or issues you can use the issues area.
-
-## Contribuition
-
-You can contribute, just opening a pull request. Together we can help a lot of developers to implement In-Game Purchases.
+You can contribute by opening a pull request. Together, we can help a lot of developers implement in-game purchases.
