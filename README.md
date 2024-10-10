@@ -1,12 +1,14 @@
+**Note: This repository is currently being updated, and a version with recent updates from steam will be available shortly.**
+
 # Steam Microtransaction Bridge API [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/NF7Fuhr2FZ)
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/jasielmacedo/steam-microtransaction-api)
 
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jasielmacedo/steam-microtransaction-api/tree/main)
 
-An intermediate api to handle steam microtransactions (In Game Purchases) using steam web services.
+An intermediate API to handle Steam microtransactions (In-Game Purchases) using Steam web services.
 
-You can use this repo to fork and host an API to be used with Unity, Unreal, Godot or any engine you want to develop a steam game.
+You can use this repo to fork and host an API to be used with Unity, Unreal, Godot, or any engine you want to develop a Steam game.
 
 ## READ BEFORE USE
 
@@ -14,9 +16,9 @@ This Bridge API has been created based on the Steam Partner API recommendations.
 
 If you need to implement microtransactions in your game, **you must create** a web service to handle and request the Steam WEB API, and that's precisely the purpose of this repository.
 
-To help game developers save time and money, I've created a single code that enables them to implement microtransactions quickly.
+To help game developers save time and money, I've created a single codebase that enables them to implement microtransactions quickly.
 
-With this repository, you can use Heroku or Digital Ocean to deploy your own API with just a few clicks. See [Heroku git deploy](https://devcenter.heroku.com/articles/git) or [Digital Ocean Deploy](https://docs.digitalocean.com/products/app-platform/quickstart/#destroy-an-app), or choose any other host you prefer.
+With this repository, you can use Heroku or DigitalOcean to deploy your own API with just a few clicks. See [Heroku Git Deploy](https://devcenter.heroku.com/articles/git) or [DigitalOcean Deploy](https://docs.digitalocean.com/products/app-platform/quickstart/#destroy-an-app), or choose any other host you prefer.
 
 ## WHY DO I NEED TO USE THIS REPO OR CREATE MY OWN? CAN I MAKE REQUESTS DIRECTLY FROM MY GAME?
 
@@ -26,7 +28,7 @@ Steam doesn't recommend calling the Steam Partner API directly from your game. I
 
 ## HOW TO START THE API?
 
-This is a TypeScript (Node.js v18+) based API, and you can use services like Heroku or Digital Ocean to publish it.
+This is a TypeScript (Node.js v18+) based API, and you can use services like Heroku or DigitalOcean to publish it.
 
 To get started, follow these steps:
 
@@ -40,9 +42,9 @@ To run the API locally and for testing, duplicate the file `env.example` and ren
 5.  To test if everything is working, run `yarn test`.
 6.  To start the application, run `yarn start`.
 
-### CONFUSION ABOUT WEBKEY API GENERATION FOR STEAM IN-APP PURCHASES
+### CONFUSION ABOUT WEB API KEY GENERATION FOR STEAM IN-APP PURCHASES
 
-There is some confusion about which webkey to use for Steam in-app purchases and API in-game. Here are the instructions for generating the correct key:
+There is some confusion about which web key to use for Steam in-app purchases and in-game API integration. Here are the instructions for generating the correct key:
 
 1.  Go to the [Steam Developer Page](https://partner.steamgames.com/dashboard).
 2.  Click on the "Menu" button, and then select "User & Permissions."
@@ -79,10 +81,10 @@ You can check the example folder to see an example using Unity.
 
 ## ABOUT
 
-Maybe you're thinking, "Have you tested this code properly?" Well, I used a similar version of this code inside a game called Deliverace. It's not available on Steam anymore, but this code works.
+You might be wondering, "Has this code been properly tested?" I used a similar version of this code inside a game called Deliverace. It's no longer available on Steam, but this code works.
 
-If you have any questions, suggestions, or issues, you can use the Issues area.
+If you have any questions, suggestions, or issues, feel free to use the Issues area.
 
 ## CONTRIBUTION
 
-You can contribute by opening a pull request. Together, we can help a lot of developers implement in-game purchases.
+You can contribute by opening a pull request. Together, we can help many developers implement in-game purchases.
