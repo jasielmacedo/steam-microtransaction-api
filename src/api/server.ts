@@ -32,6 +32,8 @@ export default (
   host: string,
   port: number | string
 ): [Express, Server<typeof IncomingMessage, typeof ServerResponse>] => {
+  // Trust the reverse proxy (important for Heroku and rate limiting)
+  app.set('trust proxy', 1);
   // CORS options
   const corsOptions = {
     origin: ['*'],
