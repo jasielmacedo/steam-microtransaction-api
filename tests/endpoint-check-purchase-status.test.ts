@@ -18,7 +18,7 @@ describe('Controller Test: /CheckPurchaseStatus', () => {
       },
     });
     const { res } = getMockRes();
-    await controllers.checkPurchaseStatus(req, res);
+    await controllers.checkPurchaseStatus(req, res as any);
 
     expect(res.status).toHaveBeenCalledWith(200);
 

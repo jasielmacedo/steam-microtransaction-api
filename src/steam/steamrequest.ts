@@ -1,5 +1,4 @@
 import constants from '@src/constants';
-import queryString from 'query-string';
 
 import {
   ISteamMicroGetUserInfo,
@@ -36,28 +35,28 @@ export default class SteamRequest {
    * @param appId
    * @see https://partner.steamgames.com/doc/webapi/ISteamUser#CheckAppOwnership
    */
-  steamCheckAppOwnership(info: ISteamUserRequest): Promise<ISteamOwnershipResponse> {
+  async steamCheckAppOwnership(info: ISteamUserRequest): Promise<ISteamOwnershipResponse> {
     const data = {
       key: this.options.webkey,
       steamid: info.steamId,
       appid: info.appId,
     };
 
-    return this._get<ISteamOwnershipResponse>('ISteamUser', 'CheckAppOwnership', 2, data);
+    return await this._get<ISteamOwnershipResponse>('ISteamUser', 'CheckAppOwnership', 2, data);
   }
 
   /**
    * @param info
    * @see https://partner.steamgames.com/doc/webapi/ISteamUserAuth#AuthenticateUserTicket
    */
-  steamAuthenticateUserTicket(info: ISteamUserTicket): Promise<any> {
+  async steamAuthenticateUserTicket(info: ISteamUserTicket): Promise<any> {
     const data = {
       key: this.options.webkey,
       appid: info.appId,
       ticket: info.ticket,
     };
 
-    return this._get('ISteamUserAuth', 'AuthenticateUserTicket', this.options.version, data);
+    return await this._get('ISteamUserAuth', 'AuthenticateUserTicket', this.options.version, data);
   }
 
   /**
@@ -65,38 +64,41 @@ export default class SteamRequest {
    * @param steamId
    * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#GetUserInfo
    */
-  steamMicrotransactionGetUserInfo(steamId: string): Promise<ISteamMicroGetUserInfo> {
+  async steamMicrotransactionGetUserInfo(steamId: string): Promise<ISteamMicroGetUserInfo> {
     const data = {
       key: this.options.webkey,
       steamid: steamId,
     };
 
-    return this._get<ISteamMicroGetUserInfo>(this.interface, 'GetUserInfo', 2, data);
+    return await this._get<ISteamMicroGetUserInfo>(this.interface, 'GetUserInfo', 2, data);
   }
 
   /**
    * Initialize the microtransaction purchase.
-   * If the user have the appid opened, the confirm purchase popup will appear
+   * If the user has the appid opened, the confirm purchase popup will appear
    * @params _transaction
    * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#InitTxn
    */
-  steamMicrotransactionInitWithOneItem(transaction: ISteamOpenTransaction): Promise<ISteamMicroTx> {
-    const formData = new URLSearchParams();
-    formData.append('key', this.options.webkey);
-    formData.append('orderid', transaction.orderId);
-    formData.append('steamid', transaction.steamId);
-    formData.append('appid', transaction.appId);
-    formData.append('itemcount', '1');
-    formData.append('currency', constants.currency);
-    formData.append('language', constants.locale);
-    formData.append('usersession', 'client');
-    formData.append('itemid[0]', transaction.itemId);
-    formData.append('qty[0]', '1');
-    formData.append('amount[0]', transaction.amount + constants.currency);
-    formData.append('description[0]', transaction.itemDescription);
-    formData.append('category[0]', transaction.category);
+  async steamMicrotransactionInitWithOneItem(
+    transaction: ISteamOpenTransaction
+  ): Promise<ISteamMicroTx> {
+    const formData = new URLSearchParams({
+      key: this.options.webkey,
+      orderid: transaction.orderId,
+      steamid: transaction.steamId,
+      appid: transaction.appId,
+      itemcount: '1',
+      currency: constants.currency,
+      language: constants.locale,
+      usersession: 'client',
+      'itemid[0]': transaction.itemId,
+      'qty[0]': '1',
+      'amount[0]': transaction.amount + constants.currency,
+      'description[0]': transaction.itemDescription,
+      'category[0]': transaction.category,
+    });
 
-    return this._post<ISteamMicroTx>(
+    return await this._post<ISteamMicroTx>(
       this.interface,
       'InitTxn',
       3,
@@ -110,7 +112,7 @@ export default class SteamRequest {
    * @param info
    * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#QueryTxn
    */
-  steamMicrotransactionCheckRequest(info: ISteamTransaction): Promise<ISteamQueryTxResponse> {
+  async steamMicrotransactionCheckRequest(info: ISteamTransaction): Promise<ISteamQueryTxResponse> {
     const data = {
       key: this.options.webkey,
       orderid: info.orderId,
@@ -118,50 +120,49 @@ export default class SteamRequest {
       transid: info.transId,
     };
 
-    return this._get<ISteamQueryTxResponse>(this.interface, 'QueryTxn', 2, data);
+    return await this._get<ISteamQueryTxResponse>(this.interface, 'QueryTxn', 2, data);
   }
 
   /**
-   * When the user confirm the transaction. One callback is called on client side. Use this callback to call finalize funcion
+   * When the user confirms the transaction. One callback is called on the client-side. Use this callback to call finalize function
    *
    * @param appId
    * @param orderid
    * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#FinalizeTxn
    */
-  steamMicrotransactionFinalizeTransaction(appId: string, orderid: string): Promise<ISteamMicroTx> {
-    const formData = new URLSearchParams();
-    formData.append('key', this.options.webkey);
-    formData.append('orderid', orderid);
-    formData.append('appid', appId);
+  async steamMicrotransactionFinalizeTransaction(
+    appId: string,
+    orderid: string
+  ): Promise<ISteamMicroTx> {
+    const formData = new URLSearchParams({
+      key: this.options.webkey,
+      orderid: orderid,
+      appid: appId,
+    });
 
-    return this._post<ISteamMicroTx>(this.interface, 'FinalizeTxn', 2, formData);
+    return await this._post<ISteamMicroTx>(this.interface, 'FinalizeTxn', 2, formData);
   }
 
-  private _get<T>(
+  private async _get<T>(
     interf: string,
     method: string,
     version: number,
-    data: any,
+    data: Record<string, string>,
     url: string = this.options.url
   ): Promise<T> {
-    const parsed = queryString.stringify(data);
-
+    const parsed = new URLSearchParams(data).toString();
     const urlRequested = `${url}${interf}/${method}/v${version}/?${parsed}`;
-    return this.httpClient.get<T>(urlRequested);
+    return await this.httpClient.get<T>(urlRequested);
   }
 
-  private _post<T>(
+  private async _post<T>(
     interf: string,
     method: string,
     version: number,
-    data: any,
+    data: URLSearchParams,
     url: string = this.options.url
   ): Promise<T> {
     const urlRequested = `${url}${interf}/${method}/v${version}/`;
-    // eslint-disable-next-line no-console
-    console.log(urlRequested);
-    // eslint-disable-next-line no-console
-    console.log(data);
-    return this.httpClient.post<T>(urlRequested, data);
+    return await this.httpClient.post<T>(urlRequested, data);
   }
 }

@@ -21,7 +21,7 @@ describe('Controller Test: /GetReliableUserInfo', () => {
       },
     });
     const { res } = getMockRes();
-    await controllers.getReliableUserInfo(req, res);
+    await controllers.getReliableUserInfo(req, res as any);
 
     expect(res.status).toHaveBeenCalledWith(200);
 
