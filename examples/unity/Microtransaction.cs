@@ -1,48 +1,31 @@
 // Install http://steamworks.github.io/ to use this script
-// This script is just an example but you can use as you please
+// This script is just an example but you can use it as you please
 using Steamworks;
 using UnityEngine;
-using Jazz.http;
 using System.Collections;
-using System.Collections.Generic;
+using UnityEngine.Networking;
 
 public class Microtransaction : MonoBehaviour
 {
-    [SerializeField] private HttpSettingsEditor clientSettings;
-    [SerializeField] private string appId = "480"; // replace by your own appId
+    [SerializeField] private string baseUrl = "http://yourapi.com"; // Set this to your API base URL
+    [SerializeField] private string appId = "480"; // replace with your own appId
 
     // finish transaction callback
     protected Callback<MicroTxnAuthorizationResponse_t> m_MicroTxnAuthorizationResponse;
 
-    private HttpApi m_internalHttpApi;
-
     private int currentOrder = 1000;
-
     private string currentTransactionId = "";
 
-    // unity awake function    
+    private bool _isInPurchaseProcess = false;
+    private int currentCoins = 100;
+
+    // Unity Awake function    
     private void Awake() 
     {
         // initialize the callback to receive after the purchase
-       m_MicroTxnAuthorizationResponse = Callback<MicroTxnAuthorizationResponse_t>.Create(OnMicroTxnAuthorizationResponse); 
-
-       m_internalHttpApi = new HttpApi(clientSettings.GenerateSettings());
-
-       currentOrder += Random.Range(1000000,100000000);
+        m_MicroTxnAuthorizationResponse = Callback<MicroTxnAuthorizationResponse_t>.Create(OnMicroTxnAuthorizationResponse); 
+        currentOrder += Random.Range(1000000, 100000000);
     }
-
-    // unity update function
-    private void Update()
-    {
-        if(m_internalHttpApi != null)
-        {
-            m_internalHttpApi.Update();
-        }
-    }
-
-    bool _isInPurchaseProcess = false;
-
-    int currentCoins = 100;
 
     void OnGUI()
     {
@@ -50,7 +33,7 @@ public class Microtransaction : MonoBehaviour
         if(GUILayout.Button("Buy 1000 Coins"))
         {
             this._isInPurchaseProcess = true;
-            this.InitializePurchase();
+            StartCoroutine(InitializePurchase());
         }
     }
 
@@ -58,75 +41,85 @@ public class Microtransaction : MonoBehaviour
     // See https://partner.steamgames.com/doc/api/ISteamUser#MicroTxnAuthorizationResponse_t
     private void OnMicroTxnAuthorizationResponse(MicroTxnAuthorizationResponse_t pCallback) 
     {
-        if(pCallback.m_bAuthorized == 1)
+        if (pCallback.m_bAuthorized == 1)
         {
-            this.FinishPurchase(pCallback.m_ulOrderID.ToString());
+            StartCoroutine(FinishPurchase(pCallback.m_ulOrderID.ToString()));
         }
         Debug.Log("[" + MicroTxnAuthorizationResponse_t.k_iCallback + " - MicroTxnAuthorizationResponse] - " + pCallback.m_unAppID + " -- " + pCallback.m_ulOrderID + " -- " + pCallback.m_bAuthorized);
     }
 
     // To understand how to create products
     // see https://partner.steamgames.com/doc/features/microtransactions/implementation
-    public void InitializePurchase()
+    public IEnumerator InitializePurchase()
     {
         string userId = SteamUser.GetSteamID().ToString();
 
-        InitPurchaseArgs argsRequest = new InitPurchaseArgs();
-        argsRequest.itemId = "1001";
-        argsRequest.steamId = userId;
-        argsRequest.orderId = currentOrder.ToString();
-        argsRequest.itemDescription = "1000 Coins";
-        argsRequest.category = "Gold";
+        WWWForm form = new WWWForm();
+        form.AddField("itemId", "1001");
+        form.AddField("steamId", userId);
+        form.AddField("orderId", currentOrder.ToString());
+        form.AddField("itemDescription", "1000 Coins");
+        form.AddField("category", "Gold");
+        form.AddField("appId", appId);
 
-        // you can use your own library to call the API if you want to.
-        this.MakeApiCall("InitPurchase",argsRequest, (HttpJsonResponse response) => 
+        using (UnityWebRequest www = UnityWebRequest.Post(baseUrl + "/InitPurchase", form))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
             {
-                ApiReturnTransaction ret = JsonUtility.FromJson<ApiReturnTransaction>(response.rawResponse);
-                if(ret.transid != "")
+                Debug.LogError("Error initializing purchase: " + www.error);
+                Debug.LogError("Response Code: " + www.responseCode);
+                Debug.LogError("Response: " + www.downloadHandler.text);
+            }
+            else
+            {
+                ApiReturnTransaction ret = JsonUtility.FromJson<ApiReturnTransaction>(www.downloadHandler.text);
+                if (!string.IsNullOrEmpty(ret.transid))
                 {
-                    Debug.Log("Transaction initiated. Id:" + ret.transid);
-                    this.currentTransactionId = ret.transid;
+                    Debug.Log("Transaction initiated. Id: " + ret.transid);
+                    currentTransactionId = ret.transid;
                 }
-
-            },(HttpRequestError error) => {
-                Debug.Log(error.message);
-            },true,HttpRequestContainerType.POST);
+                else if (!string.IsNullOrEmpty(ret.error))
+                {
+                    Debug.LogError("Error from API: " + ret.error);
+                }
+            }
+        }
     }
 
-    public void FinishPurchase(string orderId)
+    public IEnumerator FinishPurchase(string orderId)
     {
-        PurchaseArgs argsRequest = new PurchaseArgs();
-        argsRequest.orderId = orderId.ToString();
+        WWWForm form = new WWWForm();
+        form.AddField("orderId", orderId);
+        form.AddField("appId", appId);
 
-        this.MakeApiCall("FinalizePurchase",argsRequest, (HttpJsonResponse response) => 
+        using (UnityWebRequest www = UnityWebRequest.Post(baseUrl + "/FinalizePurchase", form))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
             {
-                ApiReturn ret = JsonUtility.FromJson<ApiReturn>(response.rawResponse);
-                if(ret.success)
+                Debug.LogError("Error finalizing purchase: " + www.error);
+                Debug.LogError("Response Code: " + www.responseCode);
+                Debug.LogError("Response: " + www.downloadHandler.text);
+            }
+            else
+            {
+                ApiReturn ret = JsonUtility.FromJson<ApiReturn>(www.downloadHandler.text);
+                if (ret.success)
                 {
-                    // after confirmation, you can give the item for the player
+                    // after confirmation, give the item to the player
                     currentCoins += 1000;
                     Debug.Log("Transaction Finished.");
-                    this._isInPurchaseProcess = false;
+                    _isInPurchaseProcess = false;
                 }
-            },(HttpRequestError error) => {
-                Debug.Log(error.message);
-            },true,HttpRequestContainerType.POST);
-    }
-
-    // call the api    
-    private void MakeApiCall(string apiEndPoint, HttpRequestArgs args, HttpRequestContainer.ActionSuccessHandler successCallback, HttpRequestContainer.ActionErrorHandler errorCallback, bool allowQueueing = false,string requestType = HttpRequestContainerType.POST)
-    {
-        if(m_internalHttpApi != null)
-        {
-            Dictionary<string, string> extraHeaders = new Dictionary<string, string>();
-
-            args = args ?? new HttpRequestArgs();
-
-            // steam app id
-            args.appId = this.appId;
-
-            m_internalHttpApi.MakeApiCall(apiEndPoint, args, successCallback,errorCallback,extraHeaders,requestType,allowQueueing);
-        }         
+                else if (!string.IsNullOrEmpty(ret.error))
+                {
+                    Debug.LogError("Error from API: " + ret.error);
+                }
+            }
+        }
     }
 
     public class ApiReturn
@@ -138,17 +131,5 @@ public class Microtransaction : MonoBehaviour
     public class ApiReturnTransaction : ApiReturn
     {
         public string transid;
-    }
-
-    public class PurchaseArgs : HttpRequestArgs {
-        public string orderId;
-        public string transId;
-    } 
-
-    public class InitPurchaseArgs : PurchaseArgs {
-        public string itemId;
-        public string steamId;
-        public string category;
-        public string itemDescription;
     }
 }
