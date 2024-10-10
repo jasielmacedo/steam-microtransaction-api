@@ -30,7 +30,7 @@ describe('Controller Test: /InitPurchase', () => {
       body,
     });
     const { res } = getMockRes();
-    await controllers.initPurchase(req, res);
+    await controllers.initPurchase(req, res as any);
 
     expect(res.status).toHaveBeenCalledWith(200);
 
@@ -46,7 +46,7 @@ describe('Controller Test: /InitPurchase', () => {
       body,
     });
     const { res } = getMockRes();
-    await controllers.initPurchase(req, res);
+    await controllers.initPurchase(req, res as any);
 
     expect(res.status).toHaveBeenCalledWith(400);
 

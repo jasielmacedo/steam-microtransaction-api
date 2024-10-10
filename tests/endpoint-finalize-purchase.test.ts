@@ -17,7 +17,7 @@ describe('Controller Test: /FinalizePurchase', () => {
       },
     });
     const { res } = getMockRes();
-    await controllers.finalizePurchase(req, res);
+    await controllers.finalizePurchase(req, res as any);
 
     expect(res.status).toHaveBeenCalledWith(200);
 

@@ -22,7 +22,7 @@ describe('Controller Test: /CheckAppOwnership', () => {
       },
     });
     const { res } = getMockRes();
-    await controllers.checkAppOwnership(req, res);
+    await controllers.checkAppOwnership(req, res as any);
 
     expect(res.status).toHaveBeenCalledWith(200);
 

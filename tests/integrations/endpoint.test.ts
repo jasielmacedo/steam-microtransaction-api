@@ -1,23 +1,26 @@
 import server from '@src/entrypoint';
-import supertest from 'supertest';
+import supertest, { Test } from 'supertest';
 
-let request: supertest.SuperTest<supertest.Test>;
+import { Server } from 'http';
+import TestAgent from 'supertest/lib/agent';
+
+let request: TestAgent<Test>;
+let httpServer: Server;
 
 describe('API health status', () => {
   beforeAll(() => {
-    const [expressServer] = server;
-
+    const [expressServer, serverListener] = server;
     request = supertest(expressServer);
+    httpServer = serverListener;
   });
 
   it('Should be online', async () => {
     const res = await request.get('/');
-
     expect(res.body).toHaveProperty('status');
+    expect(res.body.status).toBe(true);
   });
 
   afterAll(() => {
-    const [, httpServer] = server;
     httpServer.close();
   });
 });
