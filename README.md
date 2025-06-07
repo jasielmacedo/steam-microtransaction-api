@@ -58,6 +58,7 @@ To prevent users from sending arbitrary amounts for products, there is a file ca
 ## INTEGRATING WITH YOUR GAME
 
 You can check the documentation of this API here: [https://jasielmacedo.github.io/steam-microtransaction-api/](https://jasielmacedo.github.io/steam-microtransaction-api/)
+Note that this site is static and does not provide a live API endpoint.
 
 The flow is as follows:
 
