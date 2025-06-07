@@ -8,7 +8,7 @@ import logging
 from app.api.routes import api_router
 from app.core.config import settings
 from app.core.exceptions import BaseAPIException
-from app.db.sqlite import connect_to_db, close_db
+from app.db.sqlite import connect_to_db, close_db, AsyncSessionLocal
 from app.core.init_data import init_data
 from app.utils.notifications import NotificationManager
 from app.utils.notifications.email_provider import EmailNotificationProvider
@@ -68,7 +68,8 @@ async def startup_db_client():
         # Get notification settings from the database (admin settings)
         from app.api.models.settings import Settings as SettingsModel
         admin_id = settings.ADMIN_EMAIL  # Use admin email as team_id for now
-        app_settings = await SettingsModel.get_by_team_id(admin_id)
+        async with AsyncSessionLocal() as session:
+            app_settings = await SettingsModel.get_by_team_id(session, admin_id)
         
         # Configure notification providers from settings
         if app_settings and "notificationProviders" in app_settings:

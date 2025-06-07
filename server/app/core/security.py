@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Union
 
 from fastapi import Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from pydantic import ValidationError
@@ -10,6 +11,7 @@ from app.api.models.user import User
 from app.api.schemas.user import TokenData
 from app.core.config import settings
 from app.core.exceptions import UnauthorizedException, ForbiddenException
+from app.db.sqlite import async_session
 
 
 # OAuth2 configuration
@@ -33,7 +35,10 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> Dict[str, Any]:
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    session: AsyncSession = Depends(async_session),
+) -> Dict[str, Any]:
     """Validate and decode JWT token to get current user."""
     try:
         # Decode JWT token
@@ -52,7 +57,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> Dict[str, Any
         raise UnauthorizedException("Could not validate credentials")
     
     # Get user from database
-    user = await User.get_by_id(token_data.id)
+    user = await User.get_by_id(session, token_data.id)
     if user is None:
         raise UnauthorizedException("User not found")
     
@@ -72,12 +77,15 @@ def authorize_user(allowed_roles: list) -> Any:
     return authorized_user
 
 
-async def verify_api_key(api_key: str) -> Dict[str, Any]:
+async def verify_api_key(
+    api_key: str,
+    session: AsyncSession = Depends(async_session),
+) -> Dict[str, Any]:
     """Verify API key and return user."""
     if not api_key:
         raise UnauthorizedException("API key is required")
     
-    user = await User.get_by_api_key(api_key)
+    user = await User.get_by_api_key(session, api_key)
     if not user:
         raise UnauthorizedException("Invalid API key")
     

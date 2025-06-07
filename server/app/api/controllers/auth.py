@@ -3,6 +3,7 @@ from typing import Dict, Any
 
 from fastapi import APIRouter, Depends, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.models.user import User, UserRole
 from app.api.schemas.user import (
@@ -18,16 +19,20 @@ from app.api.schemas.common import ApiResponse
 from app.core.config import settings
 from app.core.exceptions import UnauthorizedException, ConflictException, BadRequestException
 from app.core.security import create_access_token, get_current_user, authorize_user
+from app.db.sqlite import async_session
 
 # Router definition
 router = APIRouter()
 
 
 @router.post("/register", response_model=LoginResponse, status_code=status.HTTP_201_CREATED)
-async def register(user_data: UserCreate):
+async def register(
+    user_data: UserCreate,
+    session: AsyncSession = Depends(async_session),
+):
     """Register a new user."""
     # Create user
-    user = await User.create(user_data.model_dump())
+    user = await User.create(session, user_data.model_dump())
     
     # Create access token
     access_token = create_access_token(
@@ -50,10 +55,13 @@ async def register(user_data: UserCreate):
 
 
 @router.post("/login", response_model=LoginResponse)
-async def login(request: LoginRequest):
+async def login(
+    request: LoginRequest,
+    session: AsyncSession = Depends(async_session),
+):
     """Login user."""
     # Authenticate user
-    user = await User.authenticate(request.email, request.password)
+    user = await User.authenticate(session, request.email, request.password)
     
     if not user:
         raise UnauthorizedException("Invalid email or password")
@@ -79,10 +87,13 @@ async def login(request: LoginRequest):
 
 
 @router.post("/login/token", include_in_schema=False)
-async def login_token(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    session: AsyncSession = Depends(async_session),
+):
     """Login endpoint for OAuth2 token flow."""
     # Authenticate user
-    user = await User.authenticate(form_data.username, form_data.password)
+    user = await User.authenticate(session, form_data.username, form_data.password)
     
     if not user:
         raise UnauthorizedException("Invalid email or password")
@@ -112,7 +123,8 @@ async def get_me(current_user: Dict[str, Any] = Depends(get_current_user)):
 @router.put("/me", response_model=ApiResponse[UserResponse])
 async def update_me(
     update_data: UserUpdate,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """Update current user."""
     # Prevent regular users from changing their role
@@ -121,6 +133,7 @@ async def update_me(
     
     # Update user
     updated_user = await User.update(
+        session,
         current_user["_id"],
         update_data.model_dump(exclude_none=True)
     )
@@ -141,10 +154,11 @@ async def update_me(
 async def update_password(
     password_data: PasswordUpdate,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """Update user password."""
     # Get user with password
-    user = await User.get_by_id(current_user["_id"])
+    user = await User.get_by_id(session, current_user["_id"])
     
     # Verify current password
     if not await User.verify_password(password_data.current_password, user["password"]):
@@ -152,7 +166,9 @@ async def update_password(
     
     # Update password
     updated_user = await User.update(
-        current_user["_id"], {"password": password_data.new_password}
+        session,
+        current_user["_id"],
+        {"password": password_data.new_password}
     )
     
     # Create new access token
@@ -175,10 +191,13 @@ async def update_password(
 
 
 @router.post("/generateapikey", response_model=dict)
-async def generate_api_key(current_user: Dict[str, Any] = Depends(get_current_user)):
+async def generate_api_key(
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
+):
     """Generate new API key for user."""
     # Generate API key
-    api_key = await User.generate_api_key(current_user["_id"])
+    api_key = await User.generate_api_key(session, current_user["_id"])
     
     # We keep this response format to be compatible with frontend
     return {
