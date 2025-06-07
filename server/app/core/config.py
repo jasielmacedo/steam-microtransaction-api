@@ -34,9 +34,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
     
-    # MongoDB settings
-    MONGODB_URL: str = os.getenv("MONGODB_URI", "mongodb://admin:password@mongodb:27017/microtrax?authSource=admin")
-    MONGODB_DB_NAME: str = os.getenv("MONGODB_DB_NAME", "microtrax")
+    # SQLite settings
     SQLITE_DB_PATH: str = os.getenv("SQLITE_DB_PATH", "./microtrax.db")
     
     # Admin user

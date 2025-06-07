@@ -3,12 +3,11 @@ from datetime import datetime
 from typing import Dict, Any, Optional, List
 
 import httpx
-from bson import ObjectId
+from uuid import uuid4
 from fastapi import HTTPException
 
 from app.core.config import settings
 from app.core.exceptions import SteamAPIException
-from app.db.mongodb import get_database
 from app.api.models.transaction import Transaction
 from app.utils.notifications import NotificationManager, NotificationType
 
@@ -22,7 +21,7 @@ class SteamAPI:
     STEAM_API_URL = "https://api.steampowered.com"
     STEAM_STORE_API_URL = "https://store.steampowered.com/api"
     
-    # Collection name in MongoDB
+    # Collection/table name
     transactions_collection = "transactions"
     
     @classmethod
@@ -30,7 +29,7 @@ class SteamAPI:
         """Record transaction with enhanced analytics data."""
         # Generate new ID if not provided
         if "_id" not in transaction_data:
-            transaction_data["_id"] = str(ObjectId())
+            transaction_data["_id"] = str(uuid4())
             
         # Set status if not provided
         if "status" not in transaction_data:
@@ -284,24 +283,7 @@ class SteamAPI:
                 })
                 
                 # If successful, update the original init_purchase transaction to completed
-                if success:
-                    try:
-                        # Find the init_purchase transaction
-                        collection = get_database()[cls.transactions_collection]
-                        init_transaction = await collection.find_one({
-                            "type": "init_purchase",
-                            "order_id": order_id,
-                            "app_id": app_id
-                        })
-                        
-                        if init_transaction and "_id" in init_transaction:
-                            # Update its status
-                            await Transaction.update(
-                                init_transaction["_id"],
-                                {"status": "completed", "updated_at": datetime.utcnow()}
-                            )
-                    except Exception as e:
-                        logger.error(f"Error updating init transaction: {str(e)}")
+
                 
                 if data.get("response", {}).get("result") == "OK":
                     return {"success": True}
@@ -379,24 +361,6 @@ class SteamAPI:
                 await cls._record_transaction(transaction_data)
                 
                 # Update the init_purchase transaction if this check shows it's completed
-                if status == "completed":
-                    try:
-                        # Find the init_purchase transaction
-                        collection = get_database()[cls.transactions_collection]
-                        init_transaction = await collection.find_one({
-                            "type": "init_purchase",
-                            "order_id": order_id,
-                            "app_id": app_id
-                        })
-                        
-                        if init_transaction and "_id" in init_transaction:
-                            # Update its status
-                            await Transaction.update(
-                                init_transaction["_id"],
-                                {"status": "completed", "updated_at": datetime.utcnow()}
-                            )
-                    except Exception as e:
-                        logger.error(f"Error updating init transaction: {str(e)}")
                 
                 if data.get("response", {}).get("result") == "OK":
                     return {
