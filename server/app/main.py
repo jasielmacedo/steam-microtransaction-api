@@ -8,7 +8,7 @@ import logging
 from app.api.routes import api_router
 from app.core.config import settings
 from app.core.exceptions import BaseAPIException
-from app.db.mongodb import connect_to_mongo, close_mongo_connection
+from app.db.sqlite import connect_to_db, close_db
 from app.core.init_data import init_data
 from app.utils.notifications import NotificationManager
 from app.utils.notifications.email_provider import EmailNotificationProvider
@@ -49,8 +49,8 @@ app.include_router(api_router, prefix=settings.API_PREFIX)
 # Add event handlers for database connection
 @app.on_event("startup")
 async def startup_db_client():
-    logger.info("Connecting to MongoDB...")
-    await connect_to_mongo()
+    logger.info("Connecting to SQLite DB...")
+    await connect_to_db()
     
     # Initialize data after database connection
     logger.info("Initializing data...")
@@ -136,8 +136,8 @@ async def startup_db_client():
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    logger.info("Closing MongoDB connection...")
-    await close_mongo_connection()
+    logger.info("Closing SQLite connection...")
+    await close_db()
     logger.info("Shutdown completed")
 
 

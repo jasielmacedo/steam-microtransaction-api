@@ -1,8 +1,10 @@
 from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, Depends, Query, status, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.models.user import UserRole
 from app.api.models.product import Product
+from app.db.sqlite import async_session
 from app.api.schemas.product import (
     ProductCreate,
     ProductUpdate,
@@ -21,6 +23,7 @@ async def get_products(
     steam_app_id: Optional[str] = Query(None, description="Filter by Steam App ID"),
     game_id: Optional[str] = Query(None, description="Filter by Game ID"),
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """
     Get all products.
@@ -29,15 +32,7 @@ async def get_products(
     team_id = current_user.get("team_id") if current_user.get("role") != UserRole.ADMIN else None
     
     # Get products
-    products, total = await Product.get_all(
-        skip=skip, 
-        limit=limit, 
-        active_only=active_only,
-        steam_app_id=steam_app_id,
-        game_id=game_id,
-        search=search,
-        team_id=team_id
-    )
+    products, total = await Product.get_all(session, skip=skip, limit=limit)
     
     # Return response
     return {
@@ -53,13 +48,14 @@ async def get_products(
 async def get_product(
     product_id: str,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """
     Get product by ID.
     """
     try:
         # Get product
-        product = await Product.get_by_id(product_id)
+        product = await Product.get_by_id(session, product_id)
         
         # Return response
         return {
@@ -75,6 +71,7 @@ async def get_product(
 async def create_product(
     product_data: ProductCreate,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """
     Create a new product.
@@ -86,7 +83,7 @@ async def create_product(
     
     try:
         # Create product
-        product = await Product.create(product_data.model_dump())
+        product = await Product.create(session, product_data.model_dump())
         
         # Return response
         return {
@@ -103,6 +100,7 @@ async def update_product(
     product_id: str,
     update_data: ProductUpdate,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """
     Update product.
@@ -115,7 +113,9 @@ async def update_product(
     try:
         # Update product
         updated_product = await Product.update(
-            product_id, update_data.model_dump(exclude_none=True)
+            session,
+            product_id,
+            update_data.model_dump(exclude_none=True)
         )
         
         # Return response
@@ -132,6 +132,7 @@ async def update_product(
 async def delete_product(
     product_id: str,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """
     Delete product.
@@ -143,7 +144,7 @@ async def delete_product(
     
     try:
         # Delete product
-        await Product.delete(product_id)
+        await Product.delete(session, product_id)
         
         # Return response
         return {
