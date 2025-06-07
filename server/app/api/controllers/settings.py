@@ -4,7 +4,9 @@ from datetime import datetime
 
 from fastapi import Depends, status
 
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.models.settings import Settings
+from app.db.sqlite import async_session
 from app.api.schemas.settings import AppSettings, UpdateSettingsRequest, TestNotificationRequest
 from app.api.schemas.common import ApiResponse
 from app.core.security import get_current_user
@@ -13,11 +15,14 @@ from app.utils.notifications.web_provider import WebNotificationProvider
 
 logger = logging.getLogger(__name__)
 
-async def get_settings(current_user: Dict[str, Any] = Depends(get_current_user)):
+async def get_settings(
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
+):
     """Get settings for current team."""
     # In a real app, we would likely use the team_id from the user's context
     # For now, we'll use the user_id as a stand-in for team_id
-    settings = await Settings.get_by_team_id(current_user["_id"])
+    settings = await Settings.get_by_team_id(session, current_user["_id"])
     
     return ApiResponse.success_response(settings)
 
@@ -112,6 +117,7 @@ async def generate_vapid_keys():
 async def update_settings(
     update_data: UpdateSettingsRequest,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """Update settings for current team."""
     # In a real app, we would likely use the team_id from the user's context
@@ -137,6 +143,7 @@ async def update_settings(
                 logger.error(f"Failed to generate VAPID keys: {str(e)}")
     
     updated_settings = await Settings.create_or_update(
+        session,
         current_user["_id"],
         data_dict
     )

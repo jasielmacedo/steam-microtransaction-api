@@ -4,7 +4,9 @@ from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, Depends, Query, status, HTTPException, Path
 
 from app.api.models.user import UserRole
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.models.transaction import Transaction
+from app.db.sqlite import async_session
 from app.api.schemas.transaction import (
     TransactionListResponse,
     TransactionDetailResponse,
@@ -28,6 +30,7 @@ async def get_transactions(
     steam_id: Optional[str] = Query(None, description="Filter by Steam ID"),
     app_id: Optional[str] = Query(None, description="Filter by App ID"),
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """
     Get all transactions with filtering and pagination.
@@ -63,15 +66,7 @@ async def get_transactions(
     
     try:
         # Get transactions
-        transactions = await Transaction.get_all(
-            skip=skip,
-            limit=limit,
-            status_filter=status,
-            date_start=date_start,
-            date_end=date_end,
-            steam_id=steam_id,
-            app_id=app_id,
-        )
+        transactions = await Transaction.get_all(session, skip=skip, limit=limit)
         
         # Return response
         return {
@@ -90,6 +85,7 @@ async def get_transactions(
 async def get_transaction(
     transaction_id: str = Path(..., description="Transaction ID"),
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """
     Get transaction by ID.
@@ -101,7 +97,7 @@ async def get_transaction(
     
     try:
         # Get transaction
-        transaction = await Transaction.get_by_id(transaction_id)
+        transaction = await Transaction.get_by_id(session, transaction_id)
         
         # Return response
         return {
