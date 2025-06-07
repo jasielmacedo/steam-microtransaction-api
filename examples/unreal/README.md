@@ -11,11 +11,11 @@ This example demonstrates how to integrate Steam microtransactions in Unreal Eng
 
 ## File Overview
 
-### \*\* \*\* and so
+### Microtransaction Source Files
 
 These files contain the implementation of the microtransaction class for Unreal Engine.
 
-- **Microtransaction Class (**`******AMicrotransaction******`****\*\*****)\*\*: This class handles all operations related to microtransactions, such as initializing a purchase, finishing a purchase, and responding to purchase authorizations.
+- **Microtransaction Class (`AMicrotransaction`)**: This class handles all operations related to microtransactions, such as initializing a purchase, finishing a purchase, and responding to purchase authorizations.
 - **Functions**:
 
   - `InitializePurchase()`: Starts a microtransaction request by sending the necessary data to your API server.
