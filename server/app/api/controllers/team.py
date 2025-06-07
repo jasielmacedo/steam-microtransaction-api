@@ -12,13 +12,6 @@ from app.schemas.team import (
     TeamMemberDeleteResponse,
     TeamMemberUpdate,
 )
-from app.models.team import (
-    TeamMember,
-    get_team_members,
-    get_team_member,
-    add_team_member,
-    delete_team_member,
-)
 
 
 async def get_team(

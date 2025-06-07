@@ -4,7 +4,6 @@ from app.api.routes.auth import router as auth_router
 from app.api.routes.admin import router as admin_router
 from app.api.routes.steam import router as steam_router
 from app.api.routes.team import router as team_router
-from app.api.routes.apikey import router as apikey_router
 from app.api.routes.product import router as product_router
 from app.api.routes.transaction import router as transaction_router
 from app.api.routes.game import router as game_router
@@ -25,7 +24,6 @@ api_router.include_router(game_router, prefix="/admin/games", tags=["Games"])
 api_router.include_router(currency_router, prefix="/admin/currencies", tags=["Currencies"])
 api_router.include_router(export_router, prefix="/admin", tags=["Export"])
 api_router.include_router(settings_router, prefix="/admin", tags=["Settings"])
-api_router.include_router(apikey_router, prefix="/api-keys", tags=["API Keys"])
 api_router.include_router(product_router, prefix="/products", tags=["Products"])
 api_router.include_router(game_client_router, prefix="/game-client", tags=["Game Client"])
 api_router.include_router(steam_router, prefix="", tags=["Steam"])

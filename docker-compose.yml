@@ -1,19 +1,7 @@
 version: '3.8'
 
+
 services:
-  # MongoDB database
-  mongodb:
-    image: mongo:7.0
-    container_name: microtrax-mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=password
-    volumes:
-      - mongodb-data:/data/db
-    command: ["--auth"] 
 
   # Backend API server (Python FastAPI)
   server:
@@ -27,7 +15,7 @@ services:
       - ENVIRONMENT=production
       - DEBUG=False
       - PORT=3000
-      - MONGODB_URI=mongodb://admin:password@mongodb:27017/microtrax?authSource=admin
+      - SQLITE_DB_PATH=/data/microtrax.db
       - JWT_SECRET=change_this_in_production
       # CORS settings (handled in code now with defaults)
       # Add your Steam API keys and other environment variables here
@@ -35,8 +23,8 @@ services:
       - STEAM_PUBLISHER_KEY=${STEAM_PUBLISHER_KEY:-}
       - STEAM_APP_ID=${STEAM_APP_ID:-}
     restart: unless-stopped
-    depends_on:
-      - mongodb
+    volumes:
+      - microtrax-data:/data
 
   # Admin UI frontend
   admin-ui:
@@ -57,4 +45,4 @@ networks:
     name: microtrax-network
 
 volumes:
-  mongodb-data:
+  microtrax-data:

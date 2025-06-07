@@ -8,12 +8,10 @@ This is a Python FastAPI-based implementation of the Steam Microtransaction API,
 - **User Management**: Admin panel for managing users
 - **Steam API Integration**: All necessary endpoints for Steam microtransactions
 - **API Documentation**: Comprehensive API documentation with Swagger UI
-- **MongoDB Integration**: Stores user and transaction data
 
 ## Requirements
 
 - Python 3.11 or higher
-- MongoDB 5.0 or higher
 - Docker and Docker Compose (optional, for containerization)
 
 ## Getting Started
@@ -28,11 +26,6 @@ This is a Python FastAPI-based implementation of the Steam Microtransaction API,
 docker-compose up -d
 ```
 
-For development:
-
-```bash
-docker-compose -f docker-compose.dev.yml up
-```
 
 ### Manual Setup
 
@@ -65,7 +58,6 @@ Once the server is running, you can access the API documentation at:
 | DEBUG | Enable debug mode | False |
 | ENVIRONMENT | Environment (development, production) | development |
 | PORT | Server port | 3000 |
-| MONGODB_URI | MongoDB connection string | mongodb://admin:password@mongodb:27017/microtrax?authSource=admin |
 | JWT_SECRET | Secret key for JWT tokens | microtrax-jwt-secret |
 | ADMIN_EMAIL | Default admin email | admin@example.com |
 | ADMIN_PASSWORD | Default admin password | adminPassword123 |
@@ -89,7 +81,7 @@ server/
 │   │   ├── init_data.py      # Initialization data
 │   │   └── security.py       # Security utilities
 │   ├── db/                   # Database-related code
-│   │   └── mongodb.py        # MongoDB connection
+│   │   └── sqlite.py         # SQLite connection
 │   ├── utils/                # Utility functions
 │   └── main.py               # Main application
 ├── static/                   # Static files

@@ -13,7 +13,6 @@ This project provides an API to handle Steam microtransactions, and includes:
 ## Requirements
 
 - Docker and Docker Compose (recommended)
-- MongoDB
 - Steam API and Publisher keys
 
 ## Quick Start
@@ -23,10 +22,6 @@ This project provides an API to handle Steam microtransactions, and includes:
 3. Start the services:
 
 ```bash
-# For development
-docker-compose -f docker-compose.dev.yml up
-
-# For production
 docker-compose up -d
 ```
 
@@ -48,8 +43,7 @@ STEAM_APP_ID=your_app_id
 ├── admin-ui/              # React Admin Dashboard
 ├── old-server/            # Original Node.js implementation 
 ├── server/                # Python FastAPI implementation
-├── docker-compose.yml     # Production Docker configuration
-└── docker-compose.dev.yml # Development Docker configuration
+├── docker-compose.yml     # Docker configuration
 ```
 
 ## Admin Interface

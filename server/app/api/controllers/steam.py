@@ -1,12 +1,11 @@
 from typing import Dict, Any, Optional
-from bson import ObjectId
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status, Query
 
 from app.api.models.steam import SteamAPI
 from app.api.models.product import Product
 from app.api.models.game import Game
-from app.db.mongodb import get_database
 from app.api.schemas.steam import (
     GetReliableUserInfoRequest,
     CheckAppOwnershipRequest,
@@ -103,7 +102,7 @@ async def init_purchase(
     await verify_api_key(x_api_key)
     
     # Generate a unique order ID
-    order_id = str(ObjectId())
+    order_id = str(uuid4())
     
     try:
         # Get product details from database
@@ -184,102 +183,5 @@ async def init_purchase(
         )
 
 
-@router.post("/FinalizePurchase", response_model=SuccessResponse)
-async def finalize_purchase(
-    request: FinalizePurchaseRequest,
-    x_api_key: str = Header(..., description="API Key"),
-):
-    """
-    Finalize the transaction.
-    See https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#FinalizeTxn
-    """
-    # Verify API key
-    await verify_api_key(x_api_key)
-    
-    try:
-        # Get transaction details from database
-        collection = get_database()["transactions"]
-        transaction = await collection.find_one({
-            "type": "init_purchase",
-            "trans_id": request.trans_id
-        })
-        
-        if not transaction:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Transaction with ID {request.trans_id} not found"
-            )
-        
-        # Extract app_id and order_id from transaction
-        app_id = transaction.get("app_id")
-        order_id = transaction.get("order_id")
-        
-        if not app_id or not order_id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid transaction data: missing app_id or order_id"
-            )
-        
-        # Call Steam API
-        result = await SteamAPI.finalize_purchase(app_id, order_id)
-        return result
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error finalizing purchase: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error finalizing purchase: {str(e)}"
-        )
 
 
-@router.post("/CheckPurchaseStatus", response_model=PurchaseStatusResponse)
-async def check_purchase_status(
-    request: CheckPurchaseStatusRequest,
-    x_api_key: str = Header(..., description="API Key"),
-):
-    """
-    Retrieve the current status of the purchase.
-    """
-    # Verify API key
-    await verify_api_key(x_api_key)
-    
-    try:
-        # Get transaction details from database
-        collection = get_database()["transactions"]
-        transaction = await collection.find_one({
-            "type": "init_purchase",
-            "trans_id": request.trans_id
-        })
-        
-        if not transaction:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Transaction with ID {request.trans_id} not found"
-            )
-        
-        # Extract app_id and order_id from transaction
-        app_id = transaction.get("app_id")
-        order_id = transaction.get("order_id")
-        
-        if not app_id or not order_id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid transaction data: missing app_id or order_id"
-            )
-        
-        # Call Steam API
-        result = await SteamAPI.check_purchase_status(
-            app_id, order_id, request.trans_id
-        )
-        return result
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error checking purchase status: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error checking purchase status: {str(e)}"
-        )
