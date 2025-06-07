@@ -9,6 +9,7 @@ from app.api.routes import api_router
 from app.core.config import settings
 from app.core.exceptions import BaseAPIException
 from app.db.sqlite import connect_to_db, close_db, AsyncSessionLocal
+from app.db.init_db import import_all_models
 from app.core.init_data import init_data
 from app.utils.notifications import NotificationManager
 from app.utils.notifications.email_provider import EmailNotificationProvider
@@ -49,12 +50,17 @@ app.include_router(api_router, prefix=settings.API_PREFIX)
 # Add event handlers for database connection
 @app.on_event("startup")
 async def startup_db_client():
+    # Import all models first to ensure tables are registered
+    logger.info("Importing database models...")
+    import_all_models()
+    
     logger.info("Connecting to SQLite DB...")
     await connect_to_db()
     
     # Initialize data after database connection
     logger.info("Initializing data...")
-    await init_data()
+    from app.db.sqlite import AsyncSessionLocal
+    await init_data(AsyncSessionLocal)
     
     # Initialize notification providers
     logger.info("Initializing notification service...")

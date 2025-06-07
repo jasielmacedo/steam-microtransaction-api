@@ -8,7 +8,6 @@ export interface Product {
   active: boolean;
   game_id?: string;
   game_name?: string; // This will be populated by the backend
-  steam_app_id?: string;
   steam_item_id?: number;
   steam_category?: string;
   // Image URLs
@@ -44,7 +43,6 @@ export interface ProductResponse {
 export interface ProductsQueryParams {
   active_only?: boolean;
   game_id?: string;
-  steam_app_id?: string;
   search?: string;
   skip?: number;
   limit?: number;

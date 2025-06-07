@@ -36,7 +36,7 @@ async def register(
     
     # Create access token
     access_token = create_access_token(
-        data={"sub": user["_id"], "role": user["role"]},
+        data={"sub": user.id, "role": user.role},
     )
     
     # Create response
@@ -44,12 +44,12 @@ async def register(
         "success": True,
         "token": access_token,
         "user": UserResponse(
-            id=user["_id"],
-            email=user["email"],
-            name=user["name"],
-            role=user["role"],
-            steam_id=user.get("steam_id"),
-            created_at=user["created_at"],
+            id=user.id,
+            email=user.email,
+            name=user.name,
+            role=user.role,
+            steam_id=user.steam_id,
+            created_at=user.created_at,
         )
     }
 
@@ -68,7 +68,7 @@ async def login(
     
     # Create access token
     access_token = create_access_token(
-        data={"sub": user["_id"], "role": user["role"]},
+        data={"sub": user.id, "role": user.role},
     )
     
     # Create response
@@ -76,12 +76,12 @@ async def login(
         "success": True,
         "token": access_token,
         "user": UserResponse(
-            id=user["_id"],
-            email=user["email"],
-            name=user["name"],
-            role=user["role"],
-            steam_id=user.get("steam_id"),
-            created_at=user["created_at"],
+            id=user.id,
+            email=user.email,
+            name=user.name,
+            role=user.role,
+            steam_id=user.steam_id,
+            created_at=user.created_at,
         )
     }
 
@@ -100,7 +100,7 @@ async def login_token(
     
     # Create access token
     access_token = create_access_token(
-        data={"sub": user["_id"], "role": user["role"]},
+        data={"sub": user.id, "role": user.role},
     )
     
     return {"access_token": access_token, "token_type": "bearer"}
@@ -110,7 +110,7 @@ async def login_token(
 async def get_me(current_user: Dict[str, Any] = Depends(get_current_user)):
     """Get current user info."""
     user = UserResponse(
-        id=current_user["_id"],
+        id=current_user["id"],
         email=current_user["email"],
         name=current_user["name"],
         role=current_user["role"],
@@ -134,17 +134,17 @@ async def update_me(
     # Update user
     updated_user = await User.update(
         session,
-        current_user["_id"],
+        current_user["id"],
         update_data.model_dump(exclude_none=True)
     )
     
     user = UserResponse(
-        id=updated_user["_id"],
-        email=updated_user["email"],
-        name=updated_user["name"],
-        role=updated_user["role"],
-        steam_id=updated_user.get("steam_id"),
-        created_at=updated_user["created_at"],
+        id=updated_user.id,
+        email=updated_user.email,
+        name=updated_user.name,
+        role=updated_user.role,
+        steam_id=updated_user.steam_id,
+        created_at=updated_user.created_at,
     )
     
     return ApiResponse.success_response(user)
@@ -158,34 +158,34 @@ async def update_password(
 ):
     """Update user password."""
     # Get user with password
-    user = await User.get_by_id(session, current_user["_id"])
+    user = await User.get_by_id(session, current_user["id"])
     
     # Verify current password
-    if not await User.verify_password(password_data.current_password, user["password"]):
+    if not User.verify_password(password_data.current_password, user.password):
         raise UnauthorizedException("Current password is incorrect")
     
     # Update password
     updated_user = await User.update(
         session,
-        current_user["_id"],
+        current_user["id"],
         {"password": password_data.new_password}
     )
     
     # Create new access token
     access_token = create_access_token(
-        data={"sub": updated_user["_id"], "role": updated_user["role"]},
+        data={"sub": updated_user.id, "role": updated_user.role},
     )
     
     return {
         "success": True,
         "token": access_token,
         "user": UserResponse(
-            id=updated_user["_id"],
-            email=updated_user["email"],
-            name=updated_user["name"],
-            role=updated_user["role"],
-            steam_id=updated_user.get("steam_id"),
-            created_at=updated_user["created_at"],
+            id=updated_user.id,
+            email=updated_user.email,
+            name=updated_user.name,
+            role=updated_user.role,
+            steam_id=updated_user.steam_id,
+            created_at=updated_user.created_at,
         )
     }
 
@@ -197,7 +197,7 @@ async def generate_api_key(
 ):
     """Generate new API key for user."""
     # Generate API key
-    api_key = await User.generate_api_key(session, current_user["_id"])
+    api_key = await User.generate_api_key(session, current_user["id"])
     
     # We keep this response format to be compatible with frontend
     return {

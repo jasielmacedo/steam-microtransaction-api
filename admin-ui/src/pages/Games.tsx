@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash, X, Loader, DollarSign } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import HelpTooltip from '../components/ui/HelpTooltip';
 import { useGetGamesQuery, useCreateGameMutation, useUpdateGameMutation, useDeleteGameMutation, 
   Game, GameCreateUpdateRequest } from '../api/gamesApi';
 import { useGetCurrenciesQuery, useGetCurrencySettingsQuery } from '../api/apiSlice';
@@ -407,8 +408,8 @@ const Games: React.FC = () => {
             ></div>
             
             {/* Modal panel */}
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full mx-4">
+              <div className="bg-white px-6 pt-6 pb-6 sm:p-8 sm:pb-6">
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-lg font-medium text-gray-900">
                     {selectedGame ? 'Edit Game' : 'Add New Game'}
@@ -424,21 +425,41 @@ const Games: React.FC = () => {
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-4">
                     {/* Basic Game Information */}
-                    <div className="border-b border-gray-200 pb-4">
-                      <h4 className="text-sm font-medium text-gray-500 mb-3">Basic Information</h4>
+                    <div className="border-b border-gray-200 pb-6">
+                      <h4 className="text-sm font-medium text-gray-500 mb-4">Basic Information</h4>
                       
-                      <div className="mb-3">
-                        <Input
-                          label="Game Name"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleInputChange}
-                          placeholder="Enter game name"
-                          required
-                        />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <Input
+                            label="Game Name"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleInputChange}
+                            placeholder="Enter game name"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <div className="flex items-center mb-1">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Steam App ID
+                            </label>
+                            <HelpTooltip content="This is your game's unique identifier on Steam (like 730 for CS:GO). You can find this in your Steam partner dashboard or by looking at your game's Steam store URL. It's a number that Steam uses to identify your specific game." />
+                          </div>
+                          <input
+                            name="steam_app_id"
+                            type="text"
+                            value={formData.steam_app_id}
+                            onChange={handleInputChange}
+                            placeholder="e.g., 730 (for Counter-Strike)"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                            required
+                          />
+                        </div>
                       </div>
                       
-                      <div className="mb-3">
+                      <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Description
                         </label>
@@ -451,17 +472,6 @@ const Games: React.FC = () => {
                           className="w-full rounded-md shadow-sm border-gray-300 focus:ring-blue-500 focus:border-transparent focus:outline-none transition duration-150 ease-in-out"
                           required
                         ></textarea>
-                      </div>
-                      
-                      <div className="mb-3">
-                        <Input
-                          label="Steam App ID"
-                          name="steam_app_id"
-                          value={formData.steam_app_id}
-                          onChange={handleInputChange}
-                          placeholder="Enter Steam App ID"
-                          required
-                        />
                       </div>
                       
                       <div className="flex items-center mt-3">

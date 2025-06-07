@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { isTokenExpired } from '../utils/jwt';
+import { navigationService } from '../utils/navigationService';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -65,8 +66,12 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     
-    // If error is 401 Unauthorized and not a retry
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Don't redirect if this is a login request
+    const isLoginRequest = originalRequest.url?.includes('/auth/login') || 
+                          originalRequest.url?.includes('/auth/register');
+    
+    // If error is 401 Unauthorized and not a retry and not a login request
+    if (error.response?.status === 401 && !originalRequest._retry && !isLoginRequest) {
       // Mark as retry attempt
       originalRequest._retry = true;
       
@@ -74,8 +79,8 @@ api.interceptors.response.use(
       localStorage.removeItem('microtrax_token');
       localStorage.removeItem('microtrax_user');
       
-      // Optional: Redirect to login page
-      window.location.href = '/login';
+      // Use React Router navigation instead of full page reload
+      navigationService.replace('/login');
       
       // Custom event for auth context to handle
       window.dispatchEvent(new Event('auth:sessionExpired'));

@@ -100,7 +100,7 @@ class User(Base):
         return result.scalars().all()
 
     @classmethod
-    async def verify_password(cls, plain_password: str, hashed_password: str) -> bool:
+    def verify_password(cls, plain_password: str, hashed_password: str) -> bool:
         return pwd_context.verify(plain_password, hashed_password)
 
     @classmethod

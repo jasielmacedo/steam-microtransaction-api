@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGetCurrentUserQuery } from '../../api/apiSlice';
 
@@ -19,6 +19,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { isAuthenticated, user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const { isLoading, error } = useGetCurrentUserQuery();
 
   // If not authenticated, redirect to login
@@ -49,7 +50,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           <h3 className="text-red-800 font-medium">Authentication Error</h3>
           <p className="text-red-700">There was an error verifying your credentials. Please try logging in again.</p>
           <button 
-            onClick={() => window.location.href = '/login'} 
+            onClick={() => navigate('/login', { replace: true })} 
             className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
           >
             Return to Login

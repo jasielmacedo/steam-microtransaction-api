@@ -61,9 +61,17 @@ async def get_current_user(
     if user is None:
         raise UnauthorizedException("User not found")
     
-    # Remove password from user data
-    user.pop("password", None)
-    return user
+    # Return user data as dictionary (without password)
+    return {
+        "id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "role": user.role,
+        "steam_id": user.steam_id,
+        "api_key": user.api_key,
+        "created_at": user.created_at,
+        "updated_at": user.updated_at,
+    }
 
 
 def authorize_user(allowed_roles: list) -> Any:
@@ -89,6 +97,14 @@ async def verify_api_key(
     if not user:
         raise UnauthorizedException("Invalid API key")
     
-    # Remove password from user data
-    user.pop("password", None)
-    return user
+    # Return user data as dictionary (without password)
+    return {
+        "id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "role": user.role,
+        "steam_id": user.steam_id,
+        "api_key": user.api_key,
+        "created_at": user.created_at,
+        "updated_at": user.updated_at,
+    }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import HelpTooltip from '../ui/HelpTooltip';
 import { useGetGamesQuery, Game } from '../../api/gamesApi';
 
 // Product type options for the dropdown
@@ -223,7 +224,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
     e.preventDefault();
     
     if (validate()) {
-      onSave(formData);
+      // Remove steam_app_id from the data since it should come from the selected game
+      const { steam_app_id, ...productData } = formData;
+      onSave(productData);
     }
   };
   
@@ -239,8 +242,8 @@ const ProductModal: React.FC<ProductModalProps> = ({
         ></div>
         
         {/* Modal panel */}
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full mx-4">
+          <div className="bg-white px-6 pt-6 pb-6 sm:p-8 sm:pb-6">
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-lg font-medium text-gray-900">
                 {product?._id ? 'Edit Product' : 'Add New Product'}
@@ -256,22 +259,39 @@ const ProductModal: React.FC<ProductModalProps> = ({
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 {/* Basic Product Information */}
-                <div className="border-b border-gray-200 pb-4">
-                  <h4 className="text-sm font-medium text-gray-500 mb-3">Basic Information</h4>
+                <div className="border-b border-gray-200 pb-6">
+                  <h4 className="text-sm font-medium text-gray-500 mb-4">Basic Information</h4>
                   
-                  <div className="mb-3">
-                    <Input
-                      label="Product Name"
-                      name="name"
-                      value={formData.name || ''}
-                      onChange={handleChange}
-                      placeholder="Enter product name"
-                      error={errors.name}
-                      required
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <Input
+                        label="Product Name"
+                        name="name"
+                        value={formData.name || ''}
+                        onChange={handleChange}
+                        placeholder="Enter product name"
+                        error={errors.name}
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <Input
+                        label="Price ($)"
+                        name="price"
+                        type="number"
+                        value={formData.price?.toString() || '0'}
+                        onChange={handleChange}
+                        placeholder="0.00"
+                        error={errors.price}
+                        step="0.01"
+                        min="0"
+                        required
+                      />
+                    </div>
                   </div>
                   
-                  <div className="mb-3">
+                  <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Description
                     </label>
@@ -292,21 +312,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
                     {errors.description && (
                       <p className="mt-1 text-sm text-red-600">{errors.description}</p>
                     )}
-                  </div>
-                  
-                  <div className="mb-3">
-                    <Input
-                      label="Price ($)"
-                      name="price"
-                      type="number"
-                      value={formData.price?.toString() || '0'}
-                      onChange={handleChange}
-                      placeholder="0.00"
-                      error={errors.price}
-                      step="0.01"
-                      min="0"
-                      required
-                    />
                   </div>
                   
                   <div className="mb-3">
@@ -507,7 +512,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                     </p>
                   </div>
                   
-                  <div className="flex flex-wrap gap-4 mb-3">
+                  <div className="space-y-3 mb-4">
                     <div className="flex items-center">
                       <input
                         id="marketable"
@@ -520,6 +525,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                       <label htmlFor="marketable" className="ml-2 block text-sm text-gray-700">
                         Marketable
                       </label>
+                      <HelpTooltip content="When enabled, players can sell this item on the Steam Community Market to other players. Think of it like eBay for game items! Only enable if you want players to trade items for real money." />
                     </div>
                     
                     <div className="flex items-center">
@@ -534,6 +540,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                       <label htmlFor="tradable" className="ml-2 block text-sm text-gray-700">
                         Tradable
                       </label>
+                      <HelpTooltip content="Players can trade this item directly with their friends through Steam, like swapping Pokemon cards! This doesn't involve money, just player-to-player exchanges." />
                     </div>
                     
                     <div className="flex items-center">
@@ -548,6 +555,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                       <label htmlFor="store_bundle" className="ml-2 block text-sm text-gray-700">
                         Store Bundle
                       </label>
+                      <HelpTooltip content="This creates a bundle that can be sold in your Steam store page. It's like a combo deal - players buy this and get multiple items together, often at a discount!" />
                     </div>
                   </div>
                 </div>

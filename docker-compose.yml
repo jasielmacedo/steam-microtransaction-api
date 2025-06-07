@@ -24,7 +24,7 @@ services:
       - STEAM_APP_ID=${STEAM_APP_ID:-}
     restart: unless-stopped
     volumes:
-      - microtrax-data:/data
+      - ./data:/data
 
   # Admin UI frontend
   admin-ui:
@@ -43,6 +43,3 @@ services:
 networks:
   default:
     name: microtrax-network
-
-volumes:
-  microtrax-data:

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Save, AlertCircle, Check, X } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import HelpTooltip from '../components/ui/HelpTooltip';
 import { useGetSettingsQuery, useUpdateSettingsMutation, useTestNotificationMutation } from '../api/apiSlice';
 import { CompanySettings, WebhookSettings, NotificationSettings } from '../types/settings';
 import NotificationTester, { TestNotificationData } from '../components/settings/NotificationTester';
@@ -528,35 +529,52 @@ const Settings: React.FC = () => {
         
         {/* Webhook Configuration */}
         <div className="card p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Webhook Configuration</h3>
+          <div className="flex items-center mb-4">
+            <h3 className="text-lg font-medium text-gray-900">Webhook Configuration</h3>
+            <HelpTooltip content="Webhooks are like notifications for your game server. When a player buys something through Steam, we'll automatically tell your game about it so you can give them their items instantly!" />
+          </div>
           <p className="text-gray-500 mb-4">
-            Configure webhooks to receive real-time notifications for transactions
+            Configure webhooks to receive real-time notifications for Steam transactions
           </p>
           
           <div className="space-y-4">
             <div>
-              <Input
-                label="Purchase Success Webhook URL"
+              <div className="flex items-center mb-1">
+                <label className="block text-sm font-medium text-gray-700">
+                  Purchase Success Webhook URL
+                </label>
+                <HelpTooltip content="When a player successfully buys something through Steam, we'll send a POST request to this URL with all the purchase details. Your game server can then give the player their items immediately!" />
+              </div>
+              <input
                 name="purchaseSuccess"
+                type="url"
                 value={webhookSettings.purchaseSuccess}
                 onChange={handleWebhookChange}
                 placeholder="https://yourgame.example.com/webhook/purchase/success"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
               />
               <p className="mt-1 text-xs text-gray-500">
-                This URL will be called when a purchase is successfully completed
+                💡 Your game server endpoint that handles successful purchases
               </p>
             </div>
             
             <div>
-              <Input
-                label="Purchase Failed Webhook URL"
+              <div className="flex items-center mb-1">
+                <label className="block text-sm font-medium text-gray-700">
+                  Purchase Failed Webhook URL
+                </label>
+                <HelpTooltip content="If something goes wrong with a Steam purchase (payment fails, user cancels, etc.), we'll notify this URL so your game can handle it appropriately - maybe show an error message or retry logic." />
+              </div>
+              <input
                 name="purchaseFailed"
+                type="url"
                 value={webhookSettings.purchaseFailed}
                 onChange={handleWebhookChange}
                 placeholder="https://yourgame.example.com/webhook/purchase/failed"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
               />
               <p className="mt-1 text-xs text-gray-500">
-                This URL will be called when a purchase fails
+                ⚠️ Your game server endpoint that handles failed purchases
               </p>
             </div>
           </div>
