@@ -2,12 +2,71 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import { useGetGamesQuery, Game } from '../../api/gamesApi';
+
+// Product type options for the dropdown
+const PRODUCT_TYPES = [
+  { value: 'Currency', label: 'Currency' },
+  { value: 'Cosmetic', label: 'Cosmetic' },
+  { value: 'Booster', label: 'Booster' },
+  { value: 'Subscription', label: 'Subscription' },
+  { value: 'Equipment', label: 'Equipment' },
+  { value: 'Bundle', label: 'Bundle' },
+  { value: 'Content', label: 'Content' },
+  { value: 'Consumable', label: 'Consumable' },
+];
+
+// Steam category options for the dropdown
+const STEAM_CATEGORIES = [
+  { value: 'consumable', label: 'Consumable' },
+  { value: 'durable', label: 'Durable' },
+  { value: 'bundle', label: 'Bundle' },
+  { value: 'subscription', label: 'Subscription' },
+  { value: 'currency', label: 'Currency' },
+  { value: 'item', label: 'Item' },
+  { value: 'equipment', label: 'Equipment' },
+  { value: 'character', label: 'Character' },
+  { value: 'skin', label: 'Skin' },
+  { value: 'card', label: 'Card' },
+  { value: 'boost', label: 'Boost' },
+  { value: 'dlc', label: 'DLC' },
+  { value: 'expansion', label: 'Expansion' },
+  { value: 'service', label: 'Service' },
+];
+
+// Product interface matching the backend schema
+interface Product {
+  _id?: string;
+  name: string;
+  description: string;
+  price?: number;  // Legacy field, using decimal dollars
+  price_cents?: number; // New field, using integer cents
+  type: string;
+  active: boolean;
+  game_id?: string;
+  game_name?: string;
+  steam_category?: string;
+  // Image URLs
+  icon_url?: string;
+  icon_url_large?: string;
+  // Steam attributes
+  marketable?: boolean;
+  tradable?: boolean;
+  store_bundle?: boolean;
+  quantity?: number;
+  tags?: string[];
+  store_tags?: string[];
+  store_categories?: string[];
+  background_color?: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
 interface ProductModalProps {
   isOpen: boolean;
-  product: any | null;
+  product: Partial<Product> | null;
   onClose: () => void;
-  onSave: (product: any) => void;
+  onSave: (product: Partial<Product>) => void;
 }
 
 const ProductModal: React.FC<ProductModalProps> = ({
@@ -16,13 +75,31 @@ const ProductModal: React.FC<ProductModalProps> = ({
   onClose,
   onSave,
 }) => {
-  const [formData, setFormData] = useState({
-    id: '',
+  const [formData, setFormData] = useState<Partial<Product>>({
     name: '',
     description: '',
     price: 0,
+    price_cents: 0,
     type: 'Currency',
     active: true,
+    game_id: '',
+    steam_category: '',
+    icon_url: '',
+    icon_url_large: '',
+    marketable: false,
+    tradable: false,
+    store_bundle: false,
+    quantity: 1,
+    tags: [],
+    store_tags: [],
+    store_categories: [],
+    background_color: '',
+  });
+  
+  // Fetch games for the dropdown
+  const { data: games, isLoading: isLoadingGames } = useGetGamesQuery({ 
+    page: 1, 
+    size: 100 
   });
   
   const [errors, setErrors] = useState({
@@ -35,15 +112,31 @@ const ProductModal: React.FC<ProductModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       if (product) {
-        setFormData({ ...product });
+        setFormData({ 
+          ...formData,
+          ...product 
+        });
       } else {
         setFormData({
-          id: '',
+          _id: undefined,
           name: '',
           description: '',
           price: 0,
+          price_cents: 0,
           type: 'Currency',
           active: true,
+          game_id: '',
+          steam_category: '',
+          icon_url: '',
+          icon_url_large: '',
+          marketable: false,
+          tradable: false,
+          store_bundle: false,
+          quantity: 1,
+          tags: [],
+          store_tags: [],
+          store_categories: [],
+          background_color: '',
         });
       }
       setErrors({
@@ -65,10 +158,31 @@ const ProductModal: React.FC<ProductModalProps> = ({
         [name]: checkbox.checked,
       });
     } else if (name === 'price') {
-      // Convert price to number
+      // Convert price to number and update price_cents as well
+      const priceValue = parseFloat(value) || 0;
       setFormData({
         ...formData,
-        [name]: parseFloat(value) || 0,
+        price: priceValue,
+        price_cents: Math.round(priceValue * 100),
+      });
+    } else if (name === 'quantity') {
+      // Convert quantity to number
+      setFormData({
+        ...formData,
+        [name]: parseInt(value) || 1,
+      });
+    } else if (name === 'game_id') {
+      // Just update the game_id - the backend will handle the steam_app_id automatically
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    } else if (name.includes('tags') || name.includes('categories')) {
+      // Handle array fields - comma-separated values
+      const arrayValues = value.split(',').map(item => item.trim());
+      setFormData({
+        ...formData,
+        [name]: arrayValues,
       });
     } else {
       setFormData({
@@ -86,17 +200,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
       price: '',
     };
     
-    if (!formData.name.trim()) {
+    if (!formData.name?.trim()) {
       newErrors.name = 'Product name is required';
       isValid = false;
     }
     
-    if (!formData.description.trim()) {
+    if (!formData.description?.trim()) {
       newErrors.description = 'Product description is required';
       isValid = false;
     }
     
-    if (formData.price <= 0) {
+    if (formData.price && formData.price <= 0) {
       newErrors.price = 'Price must be greater than 0';
       isValid = false;
     }
@@ -129,7 +243,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-lg font-medium text-gray-900">
-                {product ? 'Edit Product' : 'Add New Product'}
+                {product?._id ? 'Edit Product' : 'Add New Product'}
               </h3>
               <button
                 className="text-gray-400 hover:text-gray-500 focus:outline-none"
@@ -141,91 +255,301 @@ const ProductModal: React.FC<ProductModalProps> = ({
             
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
-                <div>
-                  <Input
-                    label="Product Name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Enter product name"
-                    error={errors.name}
-                    required
-                  />
+                {/* Basic Product Information */}
+                <div className="border-b border-gray-200 pb-4">
+                  <h4 className="text-sm font-medium text-gray-500 mb-3">Basic Information</h4>
+                  
+                  <div className="mb-3">
+                    <Input
+                      label="Product Name"
+                      name="name"
+                      value={formData.name || ''}
+                      onChange={handleChange}
+                      placeholder="Enter product name"
+                      error={errors.name}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description
+                    </label>
+                    <textarea
+                      name="description"
+                      value={formData.description || ''}
+                      onChange={handleChange}
+                      placeholder="Enter product description"
+                      rows={3}
+                      className={`
+                        w-full rounded-md shadow-sm px-4 py-2
+                        ${errors.description ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}
+                        focus:border-transparent focus:outline-none
+                        transition duration-150 ease-in-out text-base
+                      `}
+                      required
+                    ></textarea>
+                    {errors.description && (
+                      <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+                    )}
+                  </div>
+                  
+                  <div className="mb-3">
+                    <Input
+                      label="Price ($)"
+                      name="price"
+                      type="number"
+                      value={formData.price?.toString() || '0'}
+                      onChange={handleChange}
+                      placeholder="0.00"
+                      error={errors.price}
+                      step="0.01"
+                      min="0"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Product Type
+                    </label>
+                    <select
+                      name="type"
+                      value={formData.type || 'Currency'}
+                      onChange={handleChange}
+                      className="
+                        w-full rounded-md shadow-sm px-4 py-2
+                        border-gray-300 focus:ring-blue-500
+                        focus:border-transparent focus:outline-none
+                        transition duration-150 ease-in-out
+                        cursor-pointer text-base
+                      "
+                    >
+                      {PRODUCT_TYPES.map(type => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="flex items-center mt-3">
+                    <input
+                      id="active"
+                      name="active"
+                      type="checkbox"
+                      checked={formData.active !== undefined ? formData.active : true}
+                      onChange={handleChange}
+                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor="active" className="ml-2 block text-sm text-gray-700">
+                      Active
+                    </label>
+                  </div>
                 </div>
                 
+                {/* Game & Steam Settings */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    placeholder="Enter product description"
-                    rows={3}
-                    className={`
-                      w-full rounded-md shadow-sm
-                      ${errors.description ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}
-                      focus:border-transparent focus:outline-none
-                      transition duration-150 ease-in-out
-                    `}
-                    required
-                  ></textarea>
-                  {errors.description && (
-                    <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-                  )}
+                  <h4 className="text-sm font-medium text-gray-500 mb-3">Game & Steam Settings</h4>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Game
+                    </label>
+                    <select
+                      name="game_id"
+                      value={formData.game_id || ''}
+                      onChange={handleChange}
+                      className="
+                        w-full rounded-md shadow-sm px-4 py-2
+                        border-gray-300 focus:ring-blue-500
+                        focus:border-transparent focus:outline-none
+                        transition duration-150 ease-in-out
+                        cursor-pointer text-base
+                      "
+                    >
+                      <option value="">-- Select a game --</option>
+                      {games?.items.map((game) => (
+                        <option key={game._id} value={game._id}>
+                          {game.name} ({game.steam_app_id})
+                        </option>
+                      ))}
+                    </select>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Select the game this product belongs to. The Steam App ID will be 
+                      automatically used from the selected game.
+                    </p>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Steam Category
+                    </label>
+                    <select
+                      name="steam_category"
+                      value={formData.steam_category || ''}
+                      onChange={handleChange}
+                      className="
+                        w-full rounded-md shadow-sm px-4 py-2
+                        border-gray-300 focus:ring-blue-500
+                        focus:border-transparent focus:outline-none
+                        transition duration-150 ease-in-out
+                        cursor-pointer text-base
+                      "
+                    >
+                      <option value="">-- Select a category (optional) --</option>
+                      {STEAM_CATEGORIES.map(category => (
+                        <option key={category.value} value={category.value}>
+                          {category.label}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Select how this item should be categorized in Steam
+                    </p>
+                  </div>
                 </div>
-                
-                <div>
-                  <Input
-                    label="Price ($)"
-                    name="price"
-                    type="number"
-                    value={formData.price.toString()}
-                    onChange={handleChange}
-                    placeholder="0.00"
-                    error={errors.price}
-                    step="0.01"
-                    min="0"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Product Type
-                  </label>
-                  <select
-                    name="type"
-                    value={formData.type}
-                    onChange={handleChange}
-                    className="
-                      w-full rounded-md shadow-sm
-                      border-gray-300 focus:ring-blue-500
-                      focus:border-transparent focus:outline-none
-                      transition duration-150 ease-in-out
-                    "
-                  >
-                    <option value="Currency">Currency</option>
-                    <option value="Cosmetic">Cosmetic</option>
-                    <option value="Booster">Booster</option>
-                    <option value="Subscription">Subscription</option>
-                    <option value="Equipment">Equipment</option>
-                  </select>
-                </div>
-                
-                <div className="flex items-center mt-2">
-                  <input
-                    id="active"
-                    name="active"
-                    type="checkbox"
-                    checked={formData.active}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label htmlFor="active" className="ml-2 block text-sm text-gray-700">
-                    Active
-                  </label>
+
+                {/* Steam Image Settings */}
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <h4 className="text-sm font-medium text-gray-500 mb-3">Images & Additional Steam Settings</h4>
+                  
+                  <div className="mb-3">
+                    <Input
+                      label="Icon URL"
+                      name="icon_url"
+                      value={formData.icon_url || ''}
+                      onChange={handleChange}
+                      placeholder="https://example.com/icon.png"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      URL to a small icon image for this product
+                    </p>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <Input
+                      label="Large Icon URL"
+                      name="icon_url_large"
+                      value={formData.icon_url_large || ''}
+                      onChange={handleChange}
+                      placeholder="https://example.com/large-icon.png"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      URL to a large icon image for this product
+                    </p>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <Input
+                      label="Background Color"
+                      name="background_color"
+                      value={formData.background_color || ''}
+                      onChange={handleChange}
+                      placeholder="e.g., FFD700 (Hex color without #)"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Hex color code for display (without #)
+                    </p>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <Input
+                      label="Tags (comma-separated)"
+                      name="tags"
+                      value={formData.tags?.join(', ') || ''}
+                      onChange={handleChange}
+                      placeholder="weapon, rare, epic"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Tags for this product (comma-separated)
+                    </p>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <Input
+                      label="Store Tags (comma-separated)"
+                      name="store_tags"
+                      value={formData.store_tags?.join(', ') || ''}
+                      onChange={handleChange}
+                      placeholder="Featured, New, Sale"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Tags for the store page (comma-separated)
+                    </p>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <Input
+                      label="Store Categories (comma-separated)"
+                      name="store_categories"
+                      value={formData.store_categories?.join(', ') || ''}
+                      onChange={handleChange}
+                      placeholder="Weapons, Cosmetics, Currency"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Categories for the store page (comma-separated)
+                    </p>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <Input
+                      label="Quantity"
+                      name="quantity"
+                      type="number"
+                      value={formData.quantity?.toString() || '1'}
+                      onChange={handleChange}
+                      placeholder="1"
+                      min="1"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Default quantity per purchase (usually 1)
+                    </p>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-4 mb-3">
+                    <div className="flex items-center">
+                      <input
+                        id="marketable"
+                        name="marketable"
+                        type="checkbox"
+                        checked={formData.marketable}
+                        onChange={handleChange}
+                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <label htmlFor="marketable" className="ml-2 block text-sm text-gray-700">
+                        Marketable
+                      </label>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <input
+                        id="tradable"
+                        name="tradable"
+                        type="checkbox"
+                        checked={formData.tradable}
+                        onChange={handleChange}
+                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <label htmlFor="tradable" className="ml-2 block text-sm text-gray-700">
+                        Tradable
+                      </label>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <input
+                        id="store_bundle"
+                        name="store_bundle"
+                        type="checkbox"
+                        checked={formData.store_bundle}
+                        onChange={handleChange}
+                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <label htmlFor="store_bundle" className="ml-2 block text-sm text-gray-700">
+                        Store Bundle
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
               
@@ -243,7 +567,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   variant="primary"
                   className="w-full sm:w-auto"
                 >
-                  {product ? 'Update Product' : 'Add Product'}
+                  {product?._id ? 'Update Product' : 'Add Product'}
                 </Button>
               </div>
             </form>

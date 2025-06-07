@@ -21,3 +21,5 @@ typings/
 .vscode
 .idea
 dist
+
+**/.claude/settings.local.json

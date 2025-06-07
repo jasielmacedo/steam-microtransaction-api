@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # MongoDB database
+  mongodb:
+    image: mongo:7.0
+    container_name: microtrax-mongodb-dev
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongodb-data-dev:/data/db
+    command: ["--auth"]
+
+  # Backend API server (Python FastAPI)
+  server:
+    image: python:3.11-slim
+    container_name: microtrax-server-dev
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=True
+      - PORT=3000
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/microtrax?authSource=admin
+      - JWT_SECRET=dev_jwt_secret
+      # CORS settings (handled in code now with defaults)
+      # Add your Steam API keys and other environment variables here
+      - STEAM_API_KEY=${STEAM_API_KEY:-}
+      - STEAM_PUBLISHER_KEY=${STEAM_PUBLISHER_KEY:-}
+      - STEAM_APP_ID=${STEAM_APP_ID:-}
+    volumes:
+      - ./server:/app
+    command: sh -c "pip install -r requirements.txt && python start.py"
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+
+  # Admin UI frontend
+  admin-ui:
+    image: node:20-alpine
+    container_name: microtrax-admin-ui-dev
+    working_dir: /app
+    ports:
+      - "5173:5173" # Map container's Vite dev server port to host
+    depends_on:
+      - server
+    volumes:
+      - ./admin-ui:/app
+      - admin-ui-node-modules-dev:/app/node_modules
+    command: sh -c "npm install && npm run dev -- --host --port 5173 --force"
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=http://localhost:3000 # Points to the server service on the host machine
+      - CHOKIDAR_USEPOLLING=true 
+      - WATCHPACK_POLLING=true
+
+networks:
+  default:
+    name: microtrax-network
+    
+volumes:
+  server-node-modules-dev:
+  admin-ui-node-modules-dev:
+  mongodb-data-dev:

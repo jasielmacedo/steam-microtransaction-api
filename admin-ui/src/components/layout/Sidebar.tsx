@@ -8,8 +8,10 @@ import {
   Key,
   Settings,
   UserCircle,
+  GamepadIcon,
 } from 'lucide-react';
 import Logo from '../common/Logo';
+import SteamIcon from '../common/SteamIcon';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -19,9 +21,11 @@ interface SidebarProps {
 // Define navigation items
 const navItems = [
   { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
+  { name: 'Games', path: '/games', icon: <GamepadIcon size={20} /> },
   { name: 'Products', path: '/products', icon: <ShoppingBag size={20} /> },
   { name: 'Transactions', path: '/transactions', icon: <History size={20} /> },
   { name: 'API Keys', path: '/api-keys', icon: <Key size={20} /> },
+  { name: 'Steam API Tester', path: '/steam-api-tester', icon: <SteamIcon size={20} /> },
   { name: 'Profile & Team', path: '/profile', icon: <UserCircle size={20} /> },
   { name: 'Settings', path: '/settings', icon: <Settings size={20} /> },
 ];

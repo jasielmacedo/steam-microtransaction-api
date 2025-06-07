@@ -1,13 +1,14 @@
 import React, { ReactNode } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, Loader } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
-  value: string;
+  value?: string;
   change: string;
   isPositive: boolean;
   icon: ReactNode;
   color: string;
+  isLoading?: boolean;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -16,7 +17,8 @@ const StatCard: React.FC<StatCardProps> = ({
   change,
   isPositive,
   icon,
-  color
+  color,
+  isLoading = false
 }) => {
   // Map color to Tailwind classes
   const colorMap: Record<string, string> = {
@@ -39,18 +41,27 @@ const StatCard: React.FC<StatCardProps> = ({
       </div>
       
       <div className="flex items-end justify-between">
-        <div className="text-lg sm:text-2xl font-bold text-gray-900">{value}</div>
-        
-        <div className={`flex items-center text-xs sm:text-sm ${
-          isPositive ? 'text-green-600' : 'text-red-600'
-        }`}>
-          {isPositive ? (
-            <ChevronUp size={16} className="mr-1" />
-          ) : (
-            <ChevronDown size={16} className="mr-1" />
-          )}
-          {change}
-        </div>
+        {isLoading ? (
+          <div className="flex items-center">
+            <Loader size={18} className="text-gray-400 animate-spin" />
+            <span className="ml-2 text-gray-500">Loading...</span>
+          </div>
+        ) : (
+          <>
+            <div className="text-lg sm:text-2xl font-bold text-gray-900">{value}</div>
+            
+            <div className={`flex items-center text-xs sm:text-sm ${
+              isPositive ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {isPositive ? (
+                <ChevronUp size={16} className="mr-1" />
+              ) : (
+                <ChevronDown size={16} className="mr-1" />
+              )}
+              {change}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

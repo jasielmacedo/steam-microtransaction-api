@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+Dockerfile
+.dockerignore
+.git
+.gitignore
+.github
+.vscode
+.DS_Store
+*.md
+dist
+build
+coverage

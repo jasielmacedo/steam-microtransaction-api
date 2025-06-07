@@ -1,89 +1,173 @@
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { Mail, User, Key, Plus, Trash2, Check, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  useGetCurrentUserQuery, 
+  useUpdateProfileMutation, 
+  useUpdatePasswordMutation, 
+  useGetTeamMembersQuery,
+  useInviteTeamMemberMutation,
+  useRemoveTeamMemberMutation
+} from '../api/apiSlice';
+import { Mail, User, Key, Plus, Trash2, Check, AlertCircle, X } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
-
-interface TeamMember {
-  id: string;
-  email: string;
-  name: string;
-  role: 'admin' | 'manager' | 'viewer';
-  status: 'active' | 'pending';
-}
+import { TeamMember, TeamMemberInvite } from '../types/settings';
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  // RTK Query hooks
+  const { data: currentUser, isLoading, error } = useGetCurrentUserQuery();
+  const [updateProfile, { isLoading: isUpdatingProfile }] = useUpdateProfileMutation();
+  const [updatePassword, { isLoading: isUpdatingPassword }] = useUpdatePasswordMutation();
+  const { data: teamMembers = [], isLoading: isLoadingTeam } = useGetTeamMembersQuery();
+  const [inviteMember] = useInviteTeamMemberMutation();
+  const [removeMember] = useRemoveTeamMemberMutation();
+  
+  // Local state
   const [isEditing, setIsEditing] = useState(false);
   const [showInviteForm, setShowInviteForm] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [error2, setError] = useState<string | null>(null);
   
   // Profile form state
   const [profileForm, setProfileForm] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
+    name: currentUser?.name || '',
+    email: currentUser?.email || '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
   
   // Invite form state
-  const [inviteForm, setInviteForm] = useState({
+  const [inviteForm, setInviteForm] = useState<TeamMemberInvite>({
     email: '',
-    role: 'viewer' as TeamMember['role'],
+    role: 'viewer',
   });
+
+  // Update profile form when user data changes
+  useEffect(() => {
+    if (currentUser) {
+      setProfileForm(prev => ({
+        ...prev,
+        name: currentUser.name || prev.name,
+        email: currentUser.email || prev.email
+      }));
+    }
+  }, [currentUser]);
   
-  // Mock team members data
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
-    {
-      id: '1',
-      email: 'team.member@example.com',
-      name: 'Team Member',
-      role: 'manager',
-      status: 'active',
-    },
-    {
-      id: '2',
-      email: 'pending.user@example.com',
-      name: 'Pending User',
-      role: 'viewer',
-      status: 'pending',
-    },
-  ]);
-  
-  const handleProfileSubmit = (e: React.FormEvent) => {
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle profile update logic here
-    setIsEditing(false);
-  };
-  
-  const handleInviteSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle team member invite logic here
-    setTeamMembers([...teamMembers, {
-      id: (teamMembers.length + 1).toString(),
-      email: inviteForm.email,
-      name: inviteForm.email.split('@')[0],
-      role: inviteForm.role,
-      status: 'pending',
-    }]);
-    setInviteForm({ email: '', role: 'viewer' });
-    setShowInviteForm(false);
-  };
-  
-  const handleRemoveMember = (id: string) => {
-    if (confirm('Are you sure you want to remove this team member?')) {
-      setTeamMembers(teamMembers.filter(member => member.id !== id));
+    
+    // Validate passwords match
+    if (profileForm.newPassword !== profileForm.confirmPassword) {
+      setError('New passwords do not match');
+      return;
+    }
+    
+    try {
+      // Update profile info if changed
+      if (profileForm.name !== currentUser?.name || profileForm.email !== currentUser?.email) {
+        await updateProfile({
+          name: profileForm.name,
+          email: profileForm.email
+        });
+        setSuccessMessage('Profile updated successfully');
+      }
+      
+      // Update password if provided
+      if (profileForm.currentPassword && profileForm.newPassword) {
+        const result = await updatePassword({
+          currentPassword: profileForm.currentPassword,
+          newPassword: profileForm.newPassword
+        }).unwrap();
+        
+        if (result.success) {
+          setSuccessMessage('Password updated successfully');
+          // Clear password fields
+          setProfileForm({
+            ...profileForm,
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+          });
+        }
+      }
+      
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update profile');
     }
   };
+  
+  
+  const handleInviteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      await inviteMember(inviteForm).unwrap();
+      setSuccessMessage('Team member invited successfully');
+      setInviteForm({ email: '', role: 'viewer' });
+      setShowInviteForm(false);
+    } catch (err) {
+      console.error('Error inviting team member:', err);
+      setError(err instanceof Error ? err.message : 'Failed to invite team member');
+    }
+  };
+  
+  const handleRemoveMember = async (id: string) => {
+    if (confirm('Are you sure you want to remove this team member?')) {
+      try {
+        await removeMember(id).unwrap();
+        setSuccessMessage('Team member removed successfully');
+      } catch (err) {
+        console.error('Error removing team member:', err);
+        setError(err instanceof Error ? err.message : 'Failed to remove team member');
+      }
+    }
+  };
+
+  if (isLoading || isLoadingTeam) {
+    return <div className="text-center py-10">Loading profile data...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 text-red-700 p-4 rounded-md">
+        <h3 className="font-bold">Error loading profile</h3>
+        <p>{error.toString()}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="fade-in">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Profile & Team</h2>
+        <h2 className="text-xl font-bold text-gray-900">Profile & Settings</h2>
         <p className="text-gray-500 mt-1">
-          Manage your profile and team members
+          Manage your profile and API settings
         </p>
       </div>
+      
+      {/* Success Message */}
+      {successMessage && (
+        <div className="mb-6 bg-green-50 text-green-700 p-4 rounded-md flex items-center">
+          <Check size={18} className="mr-2 flex-shrink-0" />
+          <span>{successMessage}</span>
+          <button 
+            className="ml-auto text-green-700" 
+            onClick={() => setSuccessMessage(null)}
+          >
+            <X size={18} />
+          </button>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error2 && (
+        <div className="mb-6 bg-red-50 text-red-700 p-4 rounded-md flex items-center">
+          <AlertCircle size={18} className="mr-2 flex-shrink-0" />
+          <span>{error2}</span>
+        </div>
+      )}
       
       {/* Profile Section */}
       <div className="card p-6 mb-6">
@@ -119,6 +203,16 @@ const Profile: React.FC = () => {
                 onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
                 disabled={!isEditing}
                 icon={<Mail size={18} className="text-gray-500" />}
+              />
+            </div>
+
+            <div>
+              <Input
+                label="Role"
+                name="role"
+                value={currentUser?.role || ''}
+                disabled={true}
+                icon={<User size={18} className="text-gray-500" />}
               />
             </div>
             
@@ -170,6 +264,7 @@ const Profile: React.FC = () => {
           </div>
         </form>
       </div>
+      
       
       {/* Team Management Section */}
       <div className="card p-6">

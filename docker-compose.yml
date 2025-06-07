@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # MongoDB database
+  mongodb:
+    image: mongo:7.0
+    container_name: microtrax-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongodb-data:/data/db
+    command: ["--auth"] 
+
+  # Backend API server (Python FastAPI)
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: microtrax-server
+    ports:
+      - "3000:3000"
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=False
+      - PORT=3000
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/microtrax?authSource=admin
+      - JWT_SECRET=change_this_in_production
+      # CORS settings (handled in code now with defaults)
+      # Add your Steam API keys and other environment variables here
+      - STEAM_API_KEY=${STEAM_API_KEY:-}
+      - STEAM_PUBLISHER_KEY=${STEAM_PUBLISHER_KEY:-}
+      - STEAM_APP_ID=${STEAM_APP_ID:-}
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+
+  # Admin UI frontend
+  admin-ui:
+    build:
+      context: ./admin-ui
+      dockerfile: Dockerfile
+    container_name: microtrax-admin-ui
+    ports:
+      - "5173:80" # Map container's port 80 to host's port 5173
+    depends_on:
+      - server
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=http://localhost:3000 # Points to the server service on the host machine
+
+networks:
+  default:
+    name: microtrax-network
+
+volumes:
+  mongodb-data:

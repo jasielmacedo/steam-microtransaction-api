@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Lock, Mail, AlertCircle } from 'lucide-react';
@@ -11,8 +11,22 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, error: authError, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Set error if auth context has an error
+  useEffect(() => {
+    if (authError) {
+      setError(authError);
+    }
+  }, [authError]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -89,7 +103,10 @@ const Login: React.FC = () => {
           
           <div className="mt-6 text-center text-sm">
             <p className="text-gray-500">
-              Demo: Use any email and password
+              Use the admin credentials to login
+            </p>
+            <p className="text-gray-500 mt-1">
+              Default: admin@example.com / adminPassword123
             </p>
           </div>
         </div>

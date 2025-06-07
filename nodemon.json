@@ -1,5 +1,0 @@
-{
-    "env": {
-      "DEBUG": "server,api"
-    }
-}

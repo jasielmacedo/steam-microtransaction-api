@@ -1,90 +1,99 @@
-**Note: This repository is currently being updated, and a version with recent updates from steam will be available shortly.**
+# Steam Microtransaction API
 
-# Steam Microtransaction Bridge API [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/NF7Fuhr2FZ)
+An intermediate API to handle Steam microtransactions using Steam web services.
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/jasielmacedo/steam-microtransaction-api)
+## Overview
 
-[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jasielmacedo/steam-microtransaction-api/tree/main)
+This project provides an API to handle Steam microtransactions, and includes:
 
-An intermediate API to handle Steam microtransactions (In-Game Purchases) using Steam web services.
+- **Backend API**: Python FastAPI server that communicates with the Steam API
+- **Admin UI**: React admin panel to manage users, view transactions, and generate API keys
+- **Docker Support**: Containerized setup for easy deployment
 
-You can use this repo to fork and host an API to be used with Unity, Unreal, Godot, or any engine you want to develop a Steam game.
+## Requirements
 
-## READ BEFORE USE
+- Docker and Docker Compose (recommended)
+- MongoDB
+- Steam API and Publisher keys
 
-This Bridge API has been created based on the Steam Partner API recommendations.
+## Quick Start
 
-If you need to implement microtransactions in your game, **you must create** a web service to handle and request the Steam WEB API, and that's precisely the purpose of this repository.
+1. Clone this repository
+2. Configure your environment variables (see below)
+3. Start the services:
 
-To help game developers save time and money, I've created a single codebase that enables them to implement microtransactions quickly.
+```bash
+# For development
+docker-compose -f docker-compose.dev.yml up
 
-With this repository, you can use Heroku or DigitalOcean to deploy your own API with just a few clicks. See [Heroku Git Deploy](https://devcenter.heroku.com/articles/git) or [DigitalOcean Deploy](https://docs.digitalocean.com/products/app-platform/quickstart/#destroy-an-app), or choose any other host you prefer.
+# For production
+docker-compose up -d
+```
 
-## WHY DO I NEED TO USE THIS REPO OR CREATE MY OWN? CAN I MAKE REQUESTS DIRECTLY FROM MY GAME?
+## Environment Variables
 
-First of all, it's important to read Steam's recommendations on this topic: [https://partner.steamgames.com/doc/features/microtransactions](https://partner.steamgames.com/doc/features/microtransactions)
+Set these environment variables or create a `.env` file:
 
-Steam doesn't recommend calling the Steam Partner API directly from your game. Instead, you should create your own API to act as a bridge between your game and Steam. That's the purpose of this API repository.
+```
+# Steam API Keys
+STEAM_API_KEY=your_steam_api_key
+STEAM_PUBLISHER_KEY=your_steam_publisher_key
+STEAM_APP_ID=your_app_id
+```
 
-## HOW TO START THE API?
+## Project Structure
 
-This is a TypeScript (Node.js v18+) based API, and you can use services like Heroku or DigitalOcean to publish it.
+```
+.
+├── admin-ui/              # React Admin Dashboard
+├── old-server/            # Original Node.js implementation 
+├── server/                # Python FastAPI implementation
+├── docker-compose.yml     # Production Docker configuration
+└── docker-compose.dev.yml # Development Docker configuration
+```
 
-To get started, follow these steps:
+## Admin Interface
 
-1.  Install Node.js v18+.
-2.  Clone or fork this repository.
-3.  Generate your Steam WEB API key.
+The Admin UI is available at http://localhost:5173 and provides:
 
-To run the API locally and for testing, duplicate the file `env.example` and rename it to `.env`, and then update it with the correct values.
+- User management
+- API key generation
+- Transaction history
+- Dashboard with metrics
 
-4.  Run `yarn` to install the dependencies.
-5.  To test if everything is working, run `yarn test`.
-6.  To start the application, run `yarn start`.
+Default admin credentials:
+- Email: `admin@example.com`
+- Password: `adminPassword123`
 
-### CONFUSION ABOUT WEB API KEY GENERATION FOR STEAM IN-APP PURCHASES
+**Important:** Change these credentials in production!
 
-There is some confusion about which web key to use for Steam in-app purchases and in-game API integration. Here are the instructions for generating the correct key:
+## API Endpoints
 
-1.  Go to the [Steam Developer Page](https://partner.steamgames.com/dashboard).
-2.  Click on the "Menu" button, and then select "User & Permissions."
-3.  Click on "Manage Groups" and select your app's name.
-4.  On the sidebar, you'll see a link that says "Generate WebAPI Key." Click on that link to generate the proper key.
+The API is available at http://localhost:3000 and provides:
 
-## LIST OF PRODUCTS
+- Authentication: `/api/v1/auth/*`
+- Admin functions: `/api/v1/admin/*`
+- Steam microtransaction endpoints:
+  - `/GetReliableUserInfo`
+  - `/CheckAppOwnership`
+  - `/InitPurchase`
+  - `/FinalizePurchase`
+  - `/CheckPurchaseStatus`
 
-To prevent users from sending arbitrary amounts for products, there is a file called `products.json` in the `src/` directory. Make sure to replace the ID and amount according to your list of products.
+Documentation is available at http://localhost:3000/docs
 
-## INTEGRATING WITH YOUR GAME
+## Game Integration
 
-You can check the documentation of this API here: [https://jasielmacedo.github.io/steam-microtransaction-api/](https://jasielmacedo.github.io/steam-microtransaction-api/)
+Example integrations are provided for:
+- Unity (C#)
+- Unreal Engine (C++)
 
-The flow is as follows:
+See the `examples` directory for implementation details.
 
-1.  The user (player) clicks on the UI product.
-2.  Your game calls the `/InitPurchase` endpoint to start the purchase.
-3.  The game will display a confirmation dialog (inside the game).
-4.  The user buys the item (pays for it).
-5.  The game receives a callback confirmation about the purchase.
-6.  Your game calls the `/FinalizePurchase` endpoint.
-7.  That's it.
+## Support
 
-If the user has parental control and the callback was not called, you can check the status by calling the `/CheckPurchaseStatus` endpoint.
+For questions and support, please open an issue on GitHub.
 
-### SECURITY CHECK
+## License
 
-In-game purchases are not complicated, but you need to be sure that the Steam user is reliable. To avoid scammers, simply call the `/GetReliableUserInfo` endpoint. If the return is true, you can start the microtransaction.
-
-## EXAMPLE WITH UNITY (C#)
-
-You can check the example folder to see an example using Unity.
-
-## ABOUT
-
-You might be wondering, "Has this code been properly tested?" I used a similar version of this code inside a game called Deliverace. It's no longer available on Steam, but this code works.
-
-If you have any questions, suggestions, or issues, feel free to use the Issues area.
-
-## CONTRIBUTION
-
-You can contribute by opening a pull request. Together, we can help many developers implement in-game purchases.
+This project is licensed under the ISC License - see the LICENSE.txt file for details.

@@ -1,22 +1,38 @@
 import React, { useState, useEffect } from 'react';
 
-// Mocked chart data - in a real app this would come from an API
-const data = [
-  { date: '1 Jun', revenue: 1200 },
-  { date: '5 Jun', revenue: 1800 },
-  { date: '10 Jun', revenue: 1600 },
-  { date: '15 Jun', revenue: 2100 },
-  { date: '20 Jun', revenue: 1900 },
-  { date: '25 Jun', revenue: 2400 },
-  { date: '30 Jun', revenue: 2800 },
-];
+// Chart data interface
+interface ChartDataPoint {
+  date: string;
+  revenue: number;
+  count: number;
+}
 
-const RevenueChart: React.FC = () => {
+interface RevenueChartProps {
+  data: ChartDataPoint[];
+}
+
+const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
   const [chartWidth, setChartWidth] = useState(0);
   const [chartHeight, setChartHeight] = useState(0);
   
-  // Get the maximum value from the data to scale the chart
-  const maxRevenue = Math.max(...data.map(item => item.revenue));
+  // Format date labels to be more readable
+  const formatDateLabel = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`;
+    } catch (e) {
+      return dateStr;
+    }
+  };
+  
+  // Process the data to format dates
+  const processedData = data.map(item => ({
+    ...item,
+    formattedDate: formatDateLabel(item.date)
+  }));
+  
+  // Get the maximum revenue from the data to scale the chart
+  const maxRevenue = data.length > 0 ? Math.max(...data.map(item => item.revenue)) : 1000;
   
   // Set up the chart dimensions based on container size
   useEffect(() => {
@@ -37,18 +53,27 @@ const RevenueChart: React.FC = () => {
     };
   }, []);
   
-  // Return empty div if dimensions aren't calculated yet
+  // Return empty div if dimensions aren't calculated yet or no data
   if (chartWidth === 0 || chartHeight === 0) {
     return <div className="h-[200px] bg-gray-50 animate-pulse rounded-md"></div>;
   }
   
+  // If no data, show an empty state
+  if (data.length === 0) {
+    return (
+      <div className="h-[240px] sm:h-[280px] flex items-center justify-center text-gray-500">
+        No revenue data available for this period
+      </div>
+    );
+  }
+  
   // Calculate the spacing between data points
-  const barWidth = (chartWidth - 40) / data.length;
+  const barWidth = (chartWidth - 40) / Math.max(processedData.length, 1);
   const barSpacing = barWidth * 0.3;
   const actualBarWidth = barWidth - barSpacing;
   
-  // Calculate the scale for the y-axis
-  const yScale = (chartHeight - 40) / maxRevenue;
+  // Calculate the scale for the y-axis (with buffer space)
+  const yScale = (chartHeight - 40) / (maxRevenue * 1.1);
 
   return (
     <div 
@@ -83,7 +108,7 @@ const RevenueChart: React.FC = () => {
           />
           
           {/* Bars */}
-          {data.map((item, index) => {
+          {processedData.map((item, index) => {
             const barHeight = item.revenue * yScale;
             const x = index * barWidth;
             const y = chartHeight - barHeight;
@@ -100,16 +125,21 @@ const RevenueChart: React.FC = () => {
                   className="transition-all duration-500 ease-out"
                 />
                 
-                {/* X-axis labels */}
-                <text
-                  x={x + barWidth / 2}
-                  y={chartHeight - 10}
-                  textAnchor="middle"
-                  fontSize={window.innerWidth < 640 ? "8" : "10"}
-                  fill="#6b7280"
-                >
-                  {item.date}
-                </text>
+                {/* Tooltip on hover */}
+                <title>${item.revenue.toFixed(2)} / {item.count} transactions</title>
+                
+                {/* X-axis labels - only show every n-th label on small screens */}
+                {(index % (processedData.length > 14 ? 3 : 1) === 0 || index === processedData.length - 1) && (
+                  <text
+                    x={x + barWidth / 2}
+                    y={chartHeight + 10}
+                    textAnchor="middle"
+                    fontSize={window.innerWidth < 640 ? "8" : "10"}
+                    fill="#6b7280"
+                  >
+                    {item.formattedDate}
+                  </text>
+                )}
               </g>
             );
           })}

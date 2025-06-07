@@ -24,6 +24,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     switch (location.pathname) {
       case '/':
         return 'Dashboard';
+      case '/games':
+        return 'Games';
       case '/products':
         return 'Products';
       case '/transactions':
