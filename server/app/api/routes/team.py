@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends
 from app.api.controllers.team import (
     get_team,
     invite_team_member,
+    update_team_member,
     remove_team_member,
 )
 from app.api.models.user import UserRole
@@ -35,6 +36,15 @@ router.add_api_route(
     status_code=201,
     summary="Invite team member",
     description="Invites a new team member by email",
+)
+
+router.add_api_route(
+    "/{member_id}",
+    update_team_member,
+    methods=["PUT"],
+    response_model=TeamMemberSingleResponse,
+    summary="Update team member",
+    description="Updates an existing team member",
 )
 
 router.add_api_route(

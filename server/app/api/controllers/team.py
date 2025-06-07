@@ -10,15 +10,16 @@ from app.schemas.team import (
     TeamMemberListResponse,
     TeamMemberSingleResponse,
     TeamMemberDeleteResponse,
+    TeamMemberUpdate,
 )
 from app.models.team import (
     TeamMember,
     get_team_members,
     get_team_member,
     add_team_member,
-    update_team_member,
     delete_team_member,
 )
+
 
 async def get_team(
     skip: int = Query(0, ge=0),
@@ -32,11 +33,11 @@ async def get_team(
     # Ensure user is admin
     if current_user["role"] != UserRole.ADMIN:
         raise ForbiddenException("Only admins can access this endpoint")
-    
+
     # Get users (except current admin)
     users = await User.get_all(skip=skip, limit=limit)
     team_members = [user for user in users if user["_id"] != current_user["_id"]]
-    
+
     # Convert to response model
     team_member_responses = [
         TeamMemberResponse(
@@ -50,12 +51,13 @@ async def get_team(
         )
         for member in team_members
     ]
-    
+
     return {
         "success": True,
         "count": len(team_member_responses),
         "data": team_member_responses,
     }
+
 
 async def invite_team_member(
     invite_data: TeamMemberInvite,
@@ -68,31 +70,34 @@ async def invite_team_member(
     # Ensure user is admin
     if current_user["role"] != UserRole.ADMIN:
         raise ForbiddenException("Only admins can invite team members")
-    
+
     # Check if user with this email already exists
     existing_user = await User.get_by_email(invite_data.email)
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email already exists"
+            detail="User with this email already exists",
         )
-    
+
     # Generate a temporary password
     import secrets
     import string
+
     alphabet = string.ascii_letters + string.digits
-    temp_password = ''.join(secrets.choice(alphabet) for _ in range(12))
-    
+    temp_password = "".join(secrets.choice(alphabet) for _ in range(12))
+
     # Create user with provided role
-    new_user = await User.create({
-        "name": f"Invited User ({invite_data.email})",
-        "email": invite_data.email,
-        "password": temp_password,
-        "role": invite_data.role,
-    })
-    
+    new_user = await User.create(
+        {
+            "name": f"Invited User ({invite_data.email})",
+            "email": invite_data.email,
+            "password": temp_password,
+            "role": invite_data.role,
+        }
+    )
+
     # TODO: Send invitation email with temporary password (not implemented in this version)
-    
+
     # Convert to response model
     member_response = TeamMemberResponse(
         id=new_user["_id"],
@@ -103,12 +108,45 @@ async def invite_team_member(
         created_at=new_user["created_at"],
         updated_at=new_user["updated_at"],
     )
-    
+
     return {
         "success": True,
         "data": member_response,
         "temp_password": temp_password,  # For demo purposes, would not include in production
     }
+
+
+async def update_team_member(
+    member_id: str,
+    update_data: TeamMemberUpdate,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    """Update an existing team member (role or name)."""
+    if current_user["role"] != UserRole.ADMIN:
+        raise ForbiddenException("Only admins can update team members")
+
+    try:
+        updated_user = await User.update(
+            member_id, update_data.model_dump(exclude_unset=True)
+        )
+
+        member_response = TeamMemberResponse(
+            id=updated_user["_id"],
+            name=updated_user.get("name", ""),
+            email=updated_user.get("email", ""),
+            role=updated_user.get("role", "viewer"),
+            status="active",
+            created_at=updated_user["created_at"],
+            updated_at=updated_user["updated_at"],
+        )
+
+        return {
+            "success": True,
+            "data": member_response,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
 
 async def remove_team_member(
     member_id: str,
@@ -121,18 +159,18 @@ async def remove_team_member(
     # Ensure user is admin
     if current_user["role"] != UserRole.ADMIN:
         raise ForbiddenException("Only admins can remove team members")
-    
+
     # Prevent removing yourself
     if member_id == current_user["_id"]:
         raise ForbiddenException("Cannot remove yourself from the team")
-    
+
     try:
         # Get the user to ensure it exists
         user = await User.get_by_id(member_id)
-        
+
         # Delete the user
         await User.delete(member_id)
-        
+
         return {
             "success": True,
             "message": f"Team member '{user['name']}' removed successfully",
