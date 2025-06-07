@@ -45,6 +45,12 @@ class User(Base):
         return result.scalar_one_or_none()
 
     @classmethod
+    async def get_by_api_key(cls, session: AsyncSession, api_key: str):
+        stmt = select(cls).where(cls.api_key == api_key)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @classmethod
     async def create(cls, session: AsyncSession, user_data: dict):
         hashed_password = pwd_context.hash(user_data["password"])
         user = cls(

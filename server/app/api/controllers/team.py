@@ -1,8 +1,10 @@
 from typing import Dict, Any, List
 from fastapi import Depends, Query, status, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.models.user import UserRole, User
 from app.core.security import get_current_user, authorize_user
+from app.db.sqlite import async_session
 from app.core.exceptions import ForbiddenException
 from app.schemas.team import (
     TeamMemberInvite,
@@ -18,6 +20,7 @@ async def get_team(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """
     Get all team members.
@@ -28,7 +31,7 @@ async def get_team(
         raise ForbiddenException("Only admins can access this endpoint")
 
     # Get users (except current admin)
-    users = await User.get_all(skip=skip, limit=limit)
+    users = await User.get_all(session, skip=skip, limit=limit)
     team_members = [user for user in users if user["_id"] != current_user["_id"]]
 
     # Convert to response model
@@ -55,6 +58,7 @@ async def get_team(
 async def invite_team_member(
     invite_data: TeamMemberInvite,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """
     Invite a new team member.
@@ -65,7 +69,7 @@ async def invite_team_member(
         raise ForbiddenException("Only admins can invite team members")
 
     # Check if user with this email already exists
-    existing_user = await User.get_by_email(invite_data.email)
+    existing_user = await User.get_by_email(session, invite_data.email)
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -81,6 +85,7 @@ async def invite_team_member(
 
     # Create user with provided role
     new_user = await User.create(
+        session,
         {
             "name": f"Invited User ({invite_data.email})",
             "email": invite_data.email,
@@ -113,6 +118,7 @@ async def update_team_member(
     member_id: str,
     update_data: TeamMemberUpdate,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ) -> Dict[str, Any]:
     """Update an existing team member (role or name)."""
     if current_user["role"] != UserRole.ADMIN:
@@ -120,7 +126,7 @@ async def update_team_member(
 
     try:
         updated_user = await User.update(
-            member_id, update_data.model_dump(exclude_unset=True)
+            session, member_id, update_data.model_dump(exclude_unset=True)
         )
 
         member_response = TeamMemberResponse(
@@ -144,6 +150,7 @@ async def update_team_member(
 async def remove_team_member(
     member_id: str,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """
     Remove a team member.
@@ -159,10 +166,10 @@ async def remove_team_member(
 
     try:
         # Get the user to ensure it exists
-        user = await User.get_by_id(member_id)
+        user = await User.get_by_id(session, member_id)
 
         # Delete the user
-        await User.delete(member_id)
+        await User.delete(session, member_id)
 
         return {
             "success": True,

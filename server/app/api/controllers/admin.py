@@ -1,11 +1,14 @@
 from typing import Dict, Any, List
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.models.user import User, UserRole
 from app.api.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.core.exceptions import ForbiddenException
 from app.core.security import get_current_user, authorize_user
+from app.db.sqlite import async_session
 
 # Router definition with admin-only access
 router = APIRouter(dependencies=[Depends(authorize_user([UserRole.ADMIN]))])
@@ -16,6 +19,7 @@ async def get_users(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """Get all users with pagination."""
     # Ensure user is admin
@@ -23,7 +27,7 @@ async def get_users(
         raise ForbiddenException("Only admins can access this endpoint")
     
     # Get users
-    users = await User.get_all(skip=skip, limit=limit)
+    users = await User.get_all(session, skip=skip, limit=limit)
     
     # Convert to response model
     user_responses = [
@@ -49,6 +53,7 @@ async def get_users(
 async def get_user(
     user_id: str,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """Get user by ID."""
     # Ensure user is admin
@@ -56,7 +61,7 @@ async def get_user(
         raise ForbiddenException("Only admins can access this endpoint")
     
     # Get user
-    user = await User.get_by_id(user_id)
+    user = await User.get_by_id(session, user_id)
     
     # Convert to response model
     user_response = UserResponse(
@@ -78,6 +83,7 @@ async def get_user(
 async def create_user(
     user_data: UserCreate,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """Create a new user (admin only)."""
     # Ensure user is admin
@@ -85,7 +91,7 @@ async def create_user(
         raise ForbiddenException("Only admins can access this endpoint")
     
     # Create user
-    user = await User.create(user_data.model_dump())
+    user = await User.create(session, user_data.model_dump())
     
     # Convert to response model
     user_response = UserResponse(
@@ -108,6 +114,7 @@ async def update_user(
     user_id: str,
     update_data: UserUpdate,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """Update user (admin only)."""
     # Ensure user is admin
@@ -116,6 +123,7 @@ async def update_user(
     
     # Update user
     updated_user = await User.update(
+        session,
         user_id,
         update_data.model_dump(exclude_none=True)
     )
@@ -140,6 +148,7 @@ async def update_user(
 async def delete_user(
     user_id: str,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    session: AsyncSession = Depends(async_session),
 ):
     """Delete user (admin only)."""
     # Ensure user is admin
@@ -151,7 +160,7 @@ async def delete_user(
         raise ForbiddenException("Cannot delete your own account")
     
     # Delete user
-    await User.delete(user_id)
+    await User.delete(session, user_id)
     
     return {
         "success": True,
