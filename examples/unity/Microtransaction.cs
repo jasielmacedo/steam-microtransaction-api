@@ -19,12 +19,17 @@ public class Microtransaction : MonoBehaviour
     private bool _isInPurchaseProcess = false;
     private int currentCoins = 100;
 
-    // Unity Awake function    
-    private void Awake() 
+    // Unity Awake function
+    private void Awake()
     {
         // initialize the callback to receive after the purchase
-        m_MicroTxnAuthorizationResponse = Callback<MicroTxnAuthorizationResponse_t>.Create(OnMicroTxnAuthorizationResponse); 
+        m_MicroTxnAuthorizationResponse = Callback<MicroTxnAuthorizationResponse_t>.Create(OnMicroTxnAuthorizationResponse);
         currentOrder += Random.Range(1000000, 100000000);
+    }
+
+    private void Start()
+    {
+        StartCoroutine(ProcessCallbacks());
     }
 
     void OnGUI()
@@ -119,6 +124,15 @@ public class Microtransaction : MonoBehaviour
                     Debug.LogError("Error from API: " + ret.error);
                 }
             }
+        }
+    }
+
+    private IEnumerator ProcessCallbacks()
+    {
+        while (true)
+        {
+            SteamAPI.RunCallbacks();
+            yield return new WaitForSeconds(0.5f);
         }
     }
 
