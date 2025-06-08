@@ -18,6 +18,7 @@ from app.api.schemas.steam import (
 )
 from app.core.exceptions import UnauthorizedException, NotFoundException
 from app.core.security import verify_api_key
+from app.core.config import settings
 
 # Router definition
 router = APIRouter()
@@ -180,6 +181,55 @@ async def init_purchase(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error initializing purchase: {str(e)}"
+        )
+
+
+@router.post("/FinalizePurchase", response_model=SuccessResponse)
+async def finalize_purchase(
+    request: FinalizePurchaseRequest,
+    x_api_key: str = Header(..., description="API Key"),
+):
+    """Finalize a previously initiated purchase."""
+    # Verify API key
+    await verify_api_key(x_api_key)
+
+    try:
+        result = await SteamAPI.finalize_purchase(
+            app_id=settings.STEAM_APP_ID,
+            order_id=request.trans_id,
+        )
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error finalizing purchase: {str(e)}",
+        )
+
+
+@router.post("/CheckPurchaseStatus", response_model=PurchaseStatusResponse)
+async def check_purchase_status(
+    request: CheckPurchaseStatusRequest,
+    x_api_key: str = Header(..., description="API Key"),
+):
+    """Retrieve the status of a purchase."""
+    # Verify API key
+    await verify_api_key(x_api_key)
+
+    try:
+        result = await SteamAPI.check_purchase_status(
+            app_id=settings.STEAM_APP_ID,
+            order_id=request.trans_id,
+            trans_id=request.trans_id,
+        )
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error checking purchase status: {str(e)}",
         )
 
 
