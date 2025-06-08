@@ -26,6 +26,16 @@ async def connect_to_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         logger.info("Tables created successfully")
+
+        # Handle optional migrations
+        try:
+            result = await conn.execute(text("PRAGMA table_info(products);"))
+            columns = [row[1] for row in result.fetchall()]
+            if "steam_app_id" not in columns:
+                logger.info("Adding steam_app_id column to products table")
+                await conn.execute(text("ALTER TABLE products ADD COLUMN steam_app_id VARCHAR"))
+        except Exception as e:
+            logger.error(f"Error checking/updating products table: {e}")
     
     # Verify tables were created
     async with engine.connect() as conn:
