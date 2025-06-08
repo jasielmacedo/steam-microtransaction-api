@@ -19,6 +19,7 @@ class Product(Base):
     type = Column(String, nullable=False)
     active = Column(Boolean, default=True)
     game_id = Column(String, nullable=True)
+    steam_app_id = Column(String, nullable=True)
     steam_item_id = Column(Integer, nullable=True)
     product_metadata = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
