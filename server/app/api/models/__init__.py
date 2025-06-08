@@ -4,6 +4,7 @@ from app.api.models.game import Game
 from app.api.models.product import Product
 from app.api.models.transaction import Transaction
 from app.api.models.settings import Settings
+from app.api.models.apikey import ApiKey
 
 __all__ = [
     "User",
@@ -12,4 +13,5 @@ __all__ = [
     "Product",
     "Transaction",
     "Settings",
+    "ApiKey",
 ]
