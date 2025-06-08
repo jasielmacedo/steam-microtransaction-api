@@ -12,7 +12,8 @@ def import_all_models():
             Game,
             Product,
             Transaction,
-            Settings
+            Settings,
+            ApiKey,
         )
         
         logger.info("All models imported successfully")
