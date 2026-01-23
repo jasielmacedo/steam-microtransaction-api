@@ -14,9 +14,6 @@ import httpclient from '@src/lib/httpclient';
 import { IncomingMessage, Server, ServerResponse } from 'http';
 
 import hpp from 'hpp';
-import xssClean from 'xss-clean';
-
-import mongoSanitize from 'express-mongo-sanitize';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -30,7 +27,7 @@ declare global {
 export default (
   app: Express,
   host: string,
-  port: number | string
+  port: number | string,
 ): [Express, Server<typeof IncomingMessage, typeof ServerResponse>] => {
   // Trust the reverse proxy (important for Heroku and rate limiting)
   app.set('trust proxy', 1);
@@ -60,12 +57,6 @@ export default (
 
   // Prevent HTTP Parameter Pollution
   app.use(hpp());
-
-  // Prevent Cross-site Scripting (XSS) attacks
-  app.use(xssClean());
-
-  // Prevent NoSQL Injection / Sanitize user input coming from POST body, GET queries, etc.
-  app.use(mongoSanitize());
 
   // Body parsers
   app.use(express.json());
