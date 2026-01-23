@@ -1,12 +1,10 @@
-**Note: This repository is currently being updated, and a version with recent updates from steam will be available shortly.**
-
 # Steam Microtransaction Bridge API [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/NF7Fuhr2FZ)
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/jasielmacedo/steam-microtransaction-api)
 
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jasielmacedo/steam-microtransaction-api/tree/main)
 
-An intermediate API to handle Steam microtransactions (In-Game Purchases) using Steam web services.
+An intermediate API to handle Steam microtransactions (in-game purchases) and subscriptions using Steam web services.
 
 You can use this repo to fork and host an API to be used with Unity, Unreal, Godot, or any engine you want to develop a Steam game.
 
@@ -28,11 +26,11 @@ Steam doesn't recommend calling the Steam Partner API directly from your game. I
 
 ## HOW TO START THE API?
 
-This is a TypeScript (Node.js v18+) based API, and you can use services like Heroku or DigitalOcean to publish it.
+This is a TypeScript (Node.js v22+) based API, and you can use services like Heroku or DigitalOcean to publish it.
 
 To get started, follow these steps:
 
-1.  Install Node.js v18+.
+1.  Install Node.js v22+.
 2.  Clone or fork this repository.
 3.  Generate your Steam WEB API key.
 
@@ -75,6 +73,30 @@ If the user has parental control and the callback was not called, you can check 
 ### SECURITY CHECK
 
 In-game purchases are not complicated, but you need to be sure that the Steam user is reliable. To avoid scammers, simply call the `/GetReliableUserInfo` endpoint. If the return is true, you can start the microtransaction.
+
+## API ENDPOINTS
+
+### Microtransactions
+| Endpoint | Description |
+|----------|-------------|
+| `POST /GetReliableUserInfo` | Check if user is reliable to start a purchase |
+| `POST /CheckAppOwnership` | Verify user owns the app |
+| `POST /InitPurchase` | Initialize a purchase (triggers Steam overlay) |
+| `POST /CheckPurchaseStatus` | Check current transaction status |
+| `POST /FinalizePurchase` | Complete the transaction |
+
+### Subscriptions (Recurring Billing)
+| Endpoint | Description |
+|----------|-------------|
+| `POST /GetUserAgreements` | Get user's billing agreements |
+| `POST /ProcessAgreement` | Process a recurring charge |
+| `POST /AdjustAgreement` | Adjust next billing date |
+| `POST /CancelAgreement` | Cancel a subscription |
+
+### Reports
+| Endpoint | Description |
+|----------|-------------|
+| `POST /GetReport` | Get sales and transaction reports |
 
 ## EXAMPLE WITH UNITY (C#)
 

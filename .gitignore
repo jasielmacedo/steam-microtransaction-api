@@ -26,3 +26,6 @@ dist
 CLAUDE.md
 .claude/
 PR_DESCRIPTION.md
+
+# Generated docs (built by GitHub Actions)
+docs/
