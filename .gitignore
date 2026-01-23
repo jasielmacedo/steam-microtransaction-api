@@ -21,3 +21,8 @@ typings/
 .vscode
 .idea
 dist
+
+# Claude Code
+CLAUDE.md
+.claude/
+PR_DESCRIPTION.md

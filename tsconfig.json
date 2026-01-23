@@ -1,28 +1,25 @@
 {
   "compilerOptions": {
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "lib": ["ES2022"],
+    "types": ["node", "jest"],
     "resolveJsonModule": true,
-    "lib": ["es2022"],
-    "removeComments": true,
-    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "sourceMap": true,
-    "target": "es2022",
     "outDir": "dist",
-    "inlineSources": true,
-    "esModuleInterop": true,
-    "sourceRoot": "/",
     "baseUrl": "./",
-    "skipLibCheck": true,
     "paths": {
       "@api/*": ["src/api/*"],
-      "@thirdparty/*": ["src/thirdparty/*"],
       "@src/*": ["src/*"],
       "@tests/*": ["tests/*"]
     }
   },
-  "include": ["./**/*.ts"],
-  "exclude": ["_warmup/**/*", ".vscode/**/*", "node_modules", "*.js"]
+  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

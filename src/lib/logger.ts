@@ -5,7 +5,7 @@ const logger = winston.createLogger({
     process.env.NODE_ENV === 'development'
       ? winston.format.combine(
           winston.format.splat(),
-          winston.format.prettyPrint({ colorize: true })
+          winston.format.prettyPrint({ colorize: true }),
         )
       : winston.format.combine(winston.format.splat(), winston.format.simple()),
   level: process.env.DEBUG ?? 'info',
