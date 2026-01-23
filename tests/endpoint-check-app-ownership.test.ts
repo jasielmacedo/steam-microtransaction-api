@@ -29,7 +29,7 @@ describe('Controller Test: /CheckAppOwnership', () => {
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: true,
-      })
+      }),
     );
   });
 });

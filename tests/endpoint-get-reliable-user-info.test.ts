@@ -18,6 +18,7 @@ describe('Controller Test: /GetReliableUserInfo', () => {
       steam: mockedSteamRequest,
       body: {
         steamId: VALID_USER_STEAM_ID,
+        appId: '480',
       },
     });
     const { res } = getMockRes();
@@ -28,7 +29,7 @@ describe('Controller Test: /GetReliableUserInfo', () => {
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: true,
-      })
+      }),
     );
   });
 });

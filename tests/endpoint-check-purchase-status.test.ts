@@ -42,7 +42,7 @@ describe('Controller Test: /CheckPurchaseStatus', () => {
             itemstatus: 'OK',
           },
         ],
-      })
+      }),
     );
   });
 });

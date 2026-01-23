@@ -24,7 +24,7 @@ describe('Controller Test: /FinalizePurchase', () => {
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: true,
-      })
+      }),
     );
   });
 });
