@@ -1,11 +1,17 @@
 import constants from '@src/constants';
 
 import {
+  ISteamAdjustAgreement,
+  ISteamAgreementInfoResponse,
+  ISteamAgreementResponse,
   ISteamMicroGetUserInfo,
   ISteamMicroTx,
   ISteamOpenTransaction,
   ISteamOwnershipResponse,
+  ISteamProcessAgreement,
   ISteamQueryTxResponse,
+  ISteamReportParams,
+  ISteamReportResponse,
   ISteamTransaction,
   ISteamUserRequest,
   ISteamUserTicket,
@@ -42,7 +48,7 @@ export default class SteamRequest {
       appid: info.appId,
     };
 
-    return await this._get<ISteamOwnershipResponse>('ISteamUser', 'CheckAppOwnership', 2, data);
+    return await this._get<ISteamOwnershipResponse>('ISteamUser', 'CheckAppOwnership', 4, data);
   }
 
   /**
@@ -62,12 +68,17 @@ export default class SteamRequest {
   /**
    * To check if user brought something on steam to avoid scammers
    * @param steamId
+   * @param appId
    * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#GetUserInfo
    */
-  async steamMicrotransactionGetUserInfo(steamId: string): Promise<ISteamMicroGetUserInfo> {
+  async steamMicrotransactionGetUserInfo(
+    steamId: string,
+    appId: string,
+  ): Promise<ISteamMicroGetUserInfo> {
     const data = {
       key: this.options.webkey,
       steamid: steamId,
+      appid: appId,
     };
 
     return await this._get<ISteamMicroGetUserInfo>(this.interface, 'GetUserInfo', 2, data);
@@ -80,7 +91,7 @@ export default class SteamRequest {
    * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#InitTxn
    */
   async steamMicrotransactionInitWithOneItem(
-    transaction: ISteamOpenTransaction
+    transaction: ISteamOpenTransaction,
   ): Promise<ISteamMicroTx> {
     const formData = new URLSearchParams({
       key: this.options.webkey,
@@ -93,7 +104,7 @@ export default class SteamRequest {
       usersession: 'client',
       'itemid[0]': transaction.itemId,
       'qty[0]': '1',
-      'amount[0]': transaction.amount + constants.currency,
+      'amount[0]': transaction.amount.toString(),
       'description[0]': transaction.itemDescription,
       'category[0]': transaction.category,
     });
@@ -103,7 +114,7 @@ export default class SteamRequest {
       'InitTxn',
       3,
       formData,
-      `https://api.steampowered.com/`
+      `https://api.steampowered.com/`,
     );
   }
 
@@ -120,7 +131,7 @@ export default class SteamRequest {
       transid: info.transId,
     };
 
-    return await this._get<ISteamQueryTxResponse>(this.interface, 'QueryTxn', 2, data);
+    return await this._get<ISteamQueryTxResponse>(this.interface, 'QueryTxn', 3, data);
   }
 
   /**
@@ -132,7 +143,7 @@ export default class SteamRequest {
    */
   async steamMicrotransactionFinalizeTransaction(
     appId: string,
-    orderid: string
+    orderid: string,
   ): Promise<ISteamMicroTx> {
     const formData = new URLSearchParams({
       key: this.options.webkey,
@@ -143,12 +154,130 @@ export default class SteamRequest {
     return await this._post<ISteamMicroTx>(this.interface, 'FinalizeTxn', 2, formData);
   }
 
+  /**
+   * Get transaction/sales report
+   * @param params Report parameters
+   * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#GetReport
+   */
+  async steamGetReport(params: ISteamReportParams): Promise<ISteamReportResponse> {
+    const data: Record<string, string> = {
+      key: this.options.webkey,
+      appid: params.appId,
+      time: params.time,
+    };
+
+    if (params.type) {
+      data.type = params.type;
+    }
+    if (params.maxResults) {
+      data.maxresults = params.maxResults.toString();
+    }
+
+    return await this._get<ISteamReportResponse>(this.interface, 'GetReport', 5, data);
+  }
+
+  /**
+   * Get user's billing agreements (subscriptions)
+   * @param steamId User's Steam ID
+   * @param appId Application ID
+   * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#GetUserAgreementInfo
+   */
+  async steamGetUserAgreementInfo(
+    steamId: string,
+    appId: string,
+  ): Promise<ISteamAgreementInfoResponse> {
+    const data = {
+      key: this.options.webkey,
+      steamid: steamId,
+      appid: appId,
+    };
+
+    return await this._get<ISteamAgreementInfoResponse>(
+      this.interface,
+      'GetUserAgreementInfo',
+      2,
+      data,
+    );
+  }
+
+  /**
+   * Process a recurring subscription charge
+   * @param params Process agreement parameters
+   * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#ProcessAgreement
+   */
+  async steamProcessAgreement(params: ISteamProcessAgreement): Promise<ISteamMicroTx> {
+    const formData = new URLSearchParams({
+      key: this.options.webkey,
+      steamid: params.steamId,
+      agreementid: params.agreementId,
+      appid: params.appId,
+      orderid: params.orderId,
+      amount: params.amount.toString(),
+      currency: params.currency,
+    });
+
+    return await this._post<ISteamMicroTx>(this.interface, 'ProcessAgreement', 1, formData);
+  }
+
+  /**
+   * Adjust the next billing date for a subscription
+   * @param params Adjust agreement parameters
+   * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#AdjustAgreement
+   */
+  async steamAdjustAgreement(params: ISteamAdjustAgreement): Promise<ISteamAgreementResponse> {
+    const formData = new URLSearchParams({
+      key: this.options.webkey,
+      steamid: params.steamId,
+      agreementid: params.agreementId,
+      appid: params.appId,
+      nextprocessdate: params.nextProcessDate,
+    });
+
+    if (params.oldNextProcessDate) {
+      formData.append('oldnextprocessdate', params.oldNextProcessDate);
+    }
+
+    return await this._post<ISteamAgreementResponse>(
+      this.interface,
+      'AdjustAgreement',
+      1,
+      formData,
+    );
+  }
+
+  /**
+   * Cancel a billing agreement (subscription)
+   * @param steamId User's Steam ID
+   * @param agreementId Agreement ID to cancel
+   * @param appId Application ID
+   * @see https://partner.steamgames.com/doc/webapi/ISteamMicroTxn#CancelAgreement
+   */
+  async steamCancelAgreement(
+    steamId: string,
+    agreementId: string,
+    appId: string,
+  ): Promise<ISteamAgreementResponse> {
+    const formData = new URLSearchParams({
+      key: this.options.webkey,
+      steamid: steamId,
+      agreementid: agreementId,
+      appid: appId,
+    });
+
+    return await this._post<ISteamAgreementResponse>(
+      this.interface,
+      'CancelAgreement',
+      1,
+      formData,
+    );
+  }
+
   private async _get<T>(
     interf: string,
     method: string,
     version: number,
     data: Record<string, string>,
-    url: string = this.options.url
+    url: string = this.options.url,
   ): Promise<T> {
     const parsed = new URLSearchParams(data).toString();
     const urlRequested = `${url}${interf}/${method}/v${version}/?${parsed}`;
@@ -160,7 +289,7 @@ export default class SteamRequest {
     method: string,
     version: number,
     data: URLSearchParams,
-    url: string = this.options.url
+    url: string = this.options.url,
   ): Promise<T> {
     const urlRequested = `${url}${interf}/${method}/v${version}/`;
     return await this.httpClient.post<T>(urlRequested, data);

@@ -11,7 +11,7 @@ const handleMissingFields = (fields: string[]) => (req, res, next) => {
   next();
 };
 
-const validateGetReliableUserInfo: RequestHandler = handleMissingFields(['steamId']);
+const validateGetReliableUserInfo: RequestHandler = handleMissingFields(['steamId', 'appId']);
 const validateCheckAppOwnership: RequestHandler = handleMissingFields(['steamId', 'appId']);
 const validateFinalizePurchase: RequestHandler = handleMissingFields(['appId', 'orderId']);
 const validateCheckPurchaseStatus: RequestHandler = handleMissingFields([
@@ -26,6 +26,27 @@ const validateInitPurchase: RequestHandler = handleMissingFields([
   'itemId',
   'orderId',
   'steamId',
+]);
+const validateGetReport: RequestHandler = handleMissingFields(['appId', 'time']);
+const validateGetUserAgreements: RequestHandler = handleMissingFields(['steamId', 'appId']);
+const validateProcessAgreement: RequestHandler = handleMissingFields([
+  'steamId',
+  'agreementId',
+  'appId',
+  'orderId',
+  'amount',
+  'currency',
+]);
+const validateAdjustAgreement: RequestHandler = handleMissingFields([
+  'steamId',
+  'agreementId',
+  'appId',
+  'nextProcessDate',
+]);
+const validateCancelAgreement: RequestHandler = handleMissingFields([
+  'steamId',
+  'agreementId',
+  'appId',
 ]);
 
 export default (app: Express): void => {
@@ -75,7 +96,7 @@ export default (app: Express): void => {
   router.post(
     '/GetReliableUserInfo',
     validateGetReliableUserInfo,
-    steamController.getReliableUserInfo
+    steamController.getReliableUserInfo,
   );
 
   /**
@@ -205,8 +226,108 @@ export default (app: Express): void => {
   router.post(
     '/checkPurchaseStatus',
     validateCheckPurchaseStatus,
-    steamController.checkPurchaseStatus
+    steamController.checkPurchaseStatus,
   );
+
+  /**
+   *
+   * @api {post} /GetReport Get Transaction Report
+   * @apiName GetReport
+   * @apiGroup Reports
+   * @apiVersion  1.0.0
+   * @apiDescription Get sales/transaction reports
+   *
+   * @apiHeader {String} content-type application/json *required
+   *
+   * @apiParam  (json) {String} appId Steam App Id
+   * @apiParam  (json) {String} time Start time in RFC 3339 UTC format
+   * @apiParam  (json) {String} [type] Report type: GAMESALES, STEAMSTORESALES, SETTLEMENT, CHARGEBACK, SUBSCRIPTION
+   * @apiParam  (json) {Number} [maxResults] Max results (default 1000, max 50000)
+   *
+   * @apiSuccess (Response: 200) {Boolean} success
+   * @apiSuccess (Response: 200) {Array} orders Transaction list
+   */
+  router.post('/GetReport', validateGetReport, steamController.getReport);
+
+  /**
+   *
+   * @api {post} /GetUserAgreements Get User Agreements
+   * @apiName GetUserAgreements
+   * @apiGroup Subscriptions
+   * @apiVersion  1.0.0
+   * @apiDescription Get user's billing agreements (subscriptions)
+   *
+   * @apiHeader {String} content-type application/json *required
+   *
+   * @apiParam  (json) {String} steamId User Steam ID
+   * @apiParam  (json) {String} appId Steam App Id
+   *
+   * @apiSuccess (Response: 200) {Boolean} success
+   * @apiSuccess (Response: 200) {Array} agreements User's subscription agreements
+   */
+  router.post('/GetUserAgreements', validateGetUserAgreements, steamController.getUserAgreements);
+
+  /**
+   *
+   * @api {post} /ProcessAgreement Process Recurring Charge
+   * @apiName ProcessAgreement
+   * @apiGroup Subscriptions
+   * @apiVersion  1.0.0
+   * @apiDescription Process a recurring subscription charge
+   *
+   * @apiHeader {String} content-type application/json *required
+   *
+   * @apiParam  (json) {String} steamId User Steam ID
+   * @apiParam  (json) {String} agreementId Agreement ID
+   * @apiParam  (json) {String} appId Steam App Id
+   * @apiParam  (json) {String} orderId Order ID
+   * @apiParam  (json) {Number} amount Amount in cents
+   * @apiParam  (json) {String} currency ISO 4217 currency code
+   *
+   * @apiSuccess (Response: 200) {Boolean} success
+   * @apiSuccess (Response: 200) {String} transid Transaction ID
+   */
+  router.post('/ProcessAgreement', validateProcessAgreement, steamController.processAgreement);
+
+  /**
+   *
+   * @api {post} /AdjustAgreement Adjust Billing Date
+   * @apiName AdjustAgreement
+   * @apiGroup Subscriptions
+   * @apiVersion  1.0.0
+   * @apiDescription Adjust the next billing date for a subscription
+   *
+   * @apiHeader {String} content-type application/json *required
+   *
+   * @apiParam  (json) {String} steamId User Steam ID
+   * @apiParam  (json) {String} agreementId Agreement ID
+   * @apiParam  (json) {String} appId Steam App Id
+   * @apiParam  (json) {String} nextProcessDate Next billing date (YYYYMMDD)
+   * @apiParam  (json) {String} [oldNextProcessDate] Previous date for verification
+   *
+   * @apiSuccess (Response: 200) {Boolean} success
+   * @apiSuccess (Response: 200) {String} agreementid Agreement ID
+   */
+  router.post('/AdjustAgreement', validateAdjustAgreement, steamController.adjustAgreement);
+
+  /**
+   *
+   * @api {post} /CancelAgreement Cancel Subscription
+   * @apiName CancelAgreement
+   * @apiGroup Subscriptions
+   * @apiVersion  1.0.0
+   * @apiDescription Cancel a billing agreement (subscription)
+   *
+   * @apiHeader {String} content-type application/json *required
+   *
+   * @apiParam  (json) {String} steamId User Steam ID
+   * @apiParam  (json) {String} agreementId Agreement ID
+   * @apiParam  (json) {String} appId Steam App Id
+   *
+   * @apiSuccess (Response: 200) {Boolean} success
+   * @apiSuccess (Response: 200) {String} agreementid Agreement ID
+   */
+  router.post('/CancelAgreement', validateCancelAgreement, steamController.cancelAgreement);
 
   // Add router to the application
   app.use('/', router);

@@ -1,40 +1,46 @@
 import constants from '@src/constants';
-import { ISteamOpenTransaction, ISteamTransaction } from '@src/steam/steaminterfaces';
+
+import { FetchError } from '@src/lib/httpclient';
+import {
+  ISteamAdjustAgreement,
+  ISteamOpenTransaction,
+  ISteamProcessAgreement,
+  ISteamReportParams,
+  ISteamTransaction,
+} from '@src/steam/steaminterfaces';
 import { Request, Response } from 'express';
 
-import { chain } from 'lodash';
+const validateError = (res: Response, err: unknown): void => {
+  if (err instanceof FetchError) {
+    const status = err.status ?? 400;
 
-// Improving type annotations for errors and response objects
-interface CustomError extends Error {
-  response?: {
-    status?: number;
-    error?: {
-      errordesc?: string;
-    };
-  };
-}
+    if (status === 403) {
+      res.status(403).json({ error: 'Invalid Steam WebKey' });
+      return;
+    }
 
-const validateError = (res: Response, err: CustomError): void => {
-  const status = err?.response?.status ?? 400;
-
-  if (status === 403) {
-    res.status(403).json({ error: 'Invalid Steam WebKey' });
+    res.status(status).json({ error: err.message || 'Something went wrong' });
     return;
   }
 
-  res.status(status).json({ error: err.message || 'Something went wrong' });
+  if (err instanceof Error) {
+    res.status(400).json({ error: err.message || 'Something went wrong' });
+    return;
+  }
+
+  res.status(500).json({ error: 'An unexpected error occurred' });
 };
 
 export default {
   getReliableUserInfo: async (req: Request, res: Response): Promise<void> => {
-    const { steamId } = req.body;
-    if (!steamId) {
-      res.status(400).json({ error: 'Invalid steamId' });
+    const { steamId, appId } = req.body;
+    if (!steamId || !appId) {
+      res.status(400).json({ error: 'Missing steamId or appId' });
       return;
     }
 
     try {
-      const data = await req.steam.steamMicrotransactionGetUserInfo(steamId);
+      const data = await req.steam.steamMicrotransactionGetUserInfo(steamId, appId);
 
       const success =
         data.response.result === 'OK' &&
@@ -46,7 +52,7 @@ export default {
 
       res.status(200).json({ success });
     } catch (err) {
-      validateError(res, err as CustomError);
+      validateError(res, err);
     }
   },
 
@@ -69,7 +75,7 @@ export default {
 
       res.status(200).json({ success });
     } catch (err) {
-      validateError(res, err as CustomError);
+      validateError(res, err);
     }
   },
 
@@ -82,10 +88,7 @@ export default {
       return;
     }
 
-    const product = chain(constants.products)
-      .filter(p => p.id.toString() == itemId)
-      .first()
-      .value();
+    const product = constants.products.find(p => p.id.toString() === itemId.toString());
 
     if (!product) {
       res.status(400).json({ error: 'ItemId not found in the game database' });
@@ -111,7 +114,7 @@ export default {
 
       res.status(200).json({ transid: data.response.params.transid });
     } catch (err) {
-      validateError(res, err as CustomError);
+      validateError(res, err);
     }
   },
 
@@ -132,7 +135,7 @@ export default {
 
       res.status(200).json({ success: true, ...data.response.params });
     } catch (err) {
-      validateError(res, err as CustomError);
+      validateError(res, err);
     }
   },
 
@@ -152,7 +155,134 @@ export default {
         ...(data.response?.error ? { error: data.response?.error?.errordesc } : {}),
       });
     } catch (err) {
-      validateError(res, err as CustomError);
+      validateError(res, err);
+    }
+  },
+
+  getReport: async (req: Request, res: Response): Promise<void> => {
+    const { appId, time, type, maxResults }: ISteamReportParams = req.body;
+
+    if (!appId || !time) {
+      res.status(400).json({ error: 'Missing fields appId or time' });
+      return;
+    }
+
+    try {
+      const data = await req.steam.steamGetReport({ appId, time, type, maxResults });
+
+      if (data.response?.result !== 'OK') {
+        throw new Error(data.response?.error?.errordesc ?? 'Steam API returned unknown error');
+      }
+
+      res.status(200).json({ success: true, ...data.response.params });
+    } catch (err) {
+      validateError(res, err);
+    }
+  },
+
+  getUserAgreements: async (req: Request, res: Response): Promise<void> => {
+    const { steamId, appId } = req.body;
+
+    if (!steamId || !appId) {
+      res.status(400).json({ error: 'Missing fields steamId or appId' });
+      return;
+    }
+
+    try {
+      const data = await req.steam.steamGetUserAgreementInfo(steamId, appId);
+
+      if (data.response?.result !== 'OK') {
+        throw new Error(data.response?.error?.errordesc ?? 'Steam API returned unknown error');
+      }
+
+      res.status(200).json({ success: true, ...data.response.params });
+    } catch (err) {
+      validateError(res, err);
+    }
+  },
+
+  processAgreement: async (req: Request, res: Response): Promise<void> => {
+    const { steamId, agreementId, appId, orderId, amount, currency }: ISteamProcessAgreement =
+      req.body;
+
+    if (!steamId || !agreementId || !appId || !orderId || !amount || !currency) {
+      res.status(400).json({ error: 'Missing fields' });
+      return;
+    }
+
+    try {
+      const data = await req.steam.steamProcessAgreement({
+        steamId,
+        agreementId,
+        appId,
+        orderId,
+        amount,
+        currency,
+      });
+
+      const success = data.response.result === 'OK' && data.response.params.transid;
+
+      if (!success) {
+        throw new Error(data.response?.error?.errordesc ?? 'Steam API returned unknown error');
+      }
+
+      res.status(200).json({ success: true, ...data.response.params });
+    } catch (err) {
+      validateError(res, err);
+    }
+  },
+
+  adjustAgreement: async (req: Request, res: Response): Promise<void> => {
+    const {
+      steamId,
+      agreementId,
+      appId,
+      nextProcessDate,
+      oldNextProcessDate,
+    }: ISteamAdjustAgreement = req.body;
+
+    if (!steamId || !agreementId || !appId || !nextProcessDate) {
+      res.status(400).json({ error: 'Missing fields' });
+      return;
+    }
+
+    try {
+      const data = await req.steam.steamAdjustAgreement({
+        steamId,
+        agreementId,
+        appId,
+        nextProcessDate,
+        oldNextProcessDate,
+      });
+
+      if (data.response?.result !== 'OK') {
+        throw new Error(data.response?.error?.errordesc ?? 'Steam API returned unknown error');
+      }
+
+      res.status(200).json({ success: true, ...data.response.params });
+    } catch (err) {
+      validateError(res, err);
+    }
+  },
+
+  cancelAgreement: async (req: Request, res: Response): Promise<void> => {
+    const { steamId, agreementId, appId } = req.body;
+
+    if (!steamId || !agreementId || !appId) {
+      res.status(400).json({ error: 'Missing fields' });
+      return;
+    }
+
+    try {
+      const data = await req.steam.steamCancelAgreement(steamId, agreementId, appId);
+
+      if (data.response?.result !== 'OK') {
+        throw new Error(data.response?.error?.errordesc ?? 'Steam API returned unknown error');
+      }
+
+      res.status(200).json({ success: true, ...data.response.params });
+    } catch (err) {
+      validateError(res, err);
     }
   },
 };
