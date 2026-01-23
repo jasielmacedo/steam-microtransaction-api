@@ -35,7 +35,7 @@ describe('Controller Test: /InitPurchase', () => {
     expect(res.status).toHaveBeenCalledWith(200);
 
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ transid: 'example-return-transaction-id' })
+      expect.objectContaining({ transid: 'example-return-transaction-id' }),
     );
   });
   it('Should request to init the purchase process', async () => {
@@ -51,7 +51,7 @@ describe('Controller Test: /InitPurchase', () => {
     expect(res.status).toHaveBeenCalledWith(400);
 
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: 'User FAKE-ID not logged in' })
+      expect.objectContaining({ error: 'User FAKE-ID not logged in' }),
     );
   });
 });
